@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Embarcaciones Guatapé</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* ===========================
+           PÁGINA DE INICIO (INICIAL)
+        =========================== */
+        .landing-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .landing-header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-logo {
+            color: #06b6d4;
+            font-size: 1.8rem;
+        }
+
+        .app-title {
+            color: #f8fafc;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .app-subtitle {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .login-access-btn {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .login-access-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        /* ===========================
+           HERO SECTION CON CARRUSEL
+        =========================== */
+        .hero-section {
+            position: relative;
+            height: 70vh;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .carousel-slide.video {
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-slide.video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.5) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            max-width: 900px;
+            padding: 0 24px;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.6rem;
+            margin-bottom: 32px;
+            opacity: 0.95;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .hero-cta {
+            animation: fadeInUp 1s ease-out 0.9s both;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(6, 182, 212, 0.4);
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #06b6d4;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+        }
+
+        /* ===========================
+           SECCIÓN DE INFORMACIÓN
+        =========================== */
+        .info-section {
+            flex: 1;
+            padding: 60px 24px;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .info-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .info-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 20px;
+        }
+
+        .info-subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            border-color: #06b6d4;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 16px;
+        }
+
+        .feature-description {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* ===========================
+           LOGIN MODAL
+        =========================== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-modal {
+            background: rgba(30, 41, 59, 0.98);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            width: 90%;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            animation: slideInUp 0.5s ease;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-logo {
+            color: #06b6d4;
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .login-title {
+            color: #f8fafc;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #f8fafc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .login-btn:disabled {
+            background: rgba(71, 85, 105, 0.6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* ===========================
+           DASHBOARD COMPLETO (OCULTO INICIALMENTE)
+        =========================== */
+        .admin-dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cbd5e1;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .dashboard-hero {
+            position: relative;
+            height: 40vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            padding: 40px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-title {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .dashboard-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-title p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .collection-card {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .collection-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, var(--card-color), var(--card-color-dark));
+        }
+
+        .collection-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            border-color: var(--card-color);
+        }
+
+        .collection-card.control-zarpes {
+            --card-color: #06b6d4;
+            --card-color-dark: #0891b2;
+        }
+
+        .collection-card.reservas {
+            --card-color: #10b981;
+            --card-color-dark: #059669;
+        }
+
+        .collection-card.embarcaciones {
+            --card-color: #8b5cf6;
+            --card-color-dark: #7c3aed;
+        }
+
+        .collection-card.users {
+            --card-color: #f59e0b;
+            --card-color-dark: #d97706;
+        }
+
+        .collection-card.ventas {
+            --card-color: #ef4444;
+            --card-color-dark: #dc2626;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--card-color), var(--card-color-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-count {
+            text-align: right;
+        }
+
+        .count-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #f8fafc;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .count-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-content {
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .card-btn {
+            flex: 1;
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 10px 16px;
+            color: #cbd5e1;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .card-btn:hover {
+            background: var(--card-color);
+            border-color: var(--card-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .card-btn.primary {
+            background: linear-gradient(135deg, var(--card-color), var(--card-color-dark));
+            border-color: var(--card-color);
+            color: white;
+        }
+
+        .card-btn.primary:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            margin-bottom: 40px;
+        }
+
+        .stats-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .stats-title h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(51, 65, 85, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #06b6d4;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* ===========================
+           ANIMACIONES
+        =========================== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .collection-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .collection-card:nth-child(1) { animation-delay: 0.1s; }
+        .collection-card:nth-child(2) { animation-delay: 0.2s; }
+        .collection-card:nth-child(3) { animation-delay: 0.3s; }
+        .collection-card:nth-child(4) { animation-delay: 0.4s; }
+        .collection-card:nth-child(5) { animation-delay: 0.5s; }
+
+        /* ===========================
+           RESPONSIVE
+        =========================== */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .info-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .collections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .landing-header,
+            .dashboard-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .hero-section {
+                height: 60vh;
+            }
+
+            .dashboard-hero {
+                height: 30vh;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- PÁGINA DE INICIO (LANDING) -->
+    <div id="landingPage" class="landing-page">
+        <!-- HEADER DE BIENVENIDA -->
+        <header class="landing-header">
+            <div class="header-left">
+                <div class="app-logo">
+                    <i class="fas fa-anchor"></i>
+                </div>
+                <div>
+                    <div class="app-title">Sistema Embarcaciones</div>
+                    <div class="app-subtitle">Embalse de Guatapé</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="login-access-btn" onclick="showLoginModal()">
+                    <i class="fas fa-key"></i> Acceso Administrador
+                </button>
+            </div>
+        </header>
+
+        <!-- HERO SECTION CON CARRUSEL -->
+        <section class="hero-section">
+            <div class="carousel-container" id="carousel">
+                <!-- Las imágenes se cargarán dinámicamente -->
+            </div>
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1 class="hero-title">Embalse de Guatapé</h1>
+                    <p class="hero-subtitle">El Paraíso Náutico de Antioquia</p>
+                    <p class="hero-description">
+                        Descubre la belleza incomparable del embalse más hermoso de Colombia. 
+                        Nuestro sistema de transporte fluvial te conecta con destinos únicos 
+                        en un entorno natural extraordinario.
+                    </p>
+                    <div class="hero-cta">
+                        <button class="cta-btn" onclick="showLoginModal()">
+                            <i class="fas fa-compass"></i> Administrar Sistema
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-indicators" id="carouselIndicators">
+                <!-- Los indicadores se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE INFORMACIÓN -->
+        <section class="info-section">
+            <div class="info-container">
+                <h2 class="info-title">Sistema de Gestión Integral</h2>
+                <p class="info-subtitle">
+                    Plataforma completa para la administración del transporte fluvial en el Embalse de Guatapé. 
+                    Controla operaciones, gestiona reservas y optimiza el servicio turístico.
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="feature-title">Control de Zarpes</h3>
+                        <p class="feature-description">
+                            Gestión en tiempo real de horarios, rutas y estado de todas las embarcaciones. 
+                            Optimiza la operación diaria del sistema de transporte.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3 class="feature-title">Reservas Inteligentes</h3>
+                        <p class="feature-description">
+                            Sistema avanzado de reservas con confirmación automática. 
+                            Maximiza la ocupación y mejora la experiencia del cliente.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-ship"></i>
+                        </div>
+                        <h3 class="feature-title">Flota Completa</h3>
+                        <p class="feature-description">
+                            Registro detallado de embarcaciones, mantenimiento y capacidades. 
+                            Control total de la flota náutica del embalse.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="feature-title">Reportes Avanzados</h3>
+                        <p class="feature-description">
+                            Análisis completo de ventas, estadísticas operativas y reportes financieros. 
+                            Toma decisiones basadas en datos reales.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- LOGIN MODAL -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-modal">
+            <button class="modal-close" onclick="hideLoginModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-anchor"></i>
+                </div>
+                <h2 class="login-title">Panel de Administración</h2>
+                <p class="login-subtitle">Acceso autorizado solamente</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" class="form-input" id="username" placeholder="Ingrese su usuario" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" class="form-input" id="password" placeholder="Ingrese su contraseña" required>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD ADMINISTRATIVO (OCULTO INICIALMENTE) -->
+    <div id="adminDashboard" class="admin-dashboard">
+        <!-- HEADER DEL DASHBOARD -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="app-logo">
+                    <i class="fas fa-anchor"></i>
+                </div>
+                <div>
+                    <div class="app-title">Panel de Administración</div>
+                    <div class="app-subtitle">Sistema Embarcaciones Guatapé</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="currentUser">Administrador</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- HERO SECTION REDUCIDO -->
+        <section class="dashboard-hero">
+            <div class="carousel-container" id="dashboardCarousel">
+                <!-- Mismo carrusel pero más pequeño -->
+            </div>
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1 class="hero-title" style="font-size: 2.5rem;">Centro de Control</h1>
+                    <p class="hero-subtitle" style="font-size: 1.2rem;">Administración Integral del Sistema</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTAINER DEL DASHBOARD -->
+        <div class="dashboard-container">
+            <!-- ESTADÍSTICAS RÁPIDAS -->
+            <div class="stats-section">
+                <div class="stats-title">
+                    <h3>Estadísticas del Sistema</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalVentas">0</div>
+                        <div class="stat-label">Ventas Hoy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalPasajeros">0</div>
+                        <div class="stat-label">Pasajeros Transportados</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalIngresos">$0</div>
+                        <div class="stat-label">Ingresos del Día</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="embarcacionesActivas">0</div>
+                        <div class="stat-label">Embarcaciones Activas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TÍTULO DEL DASHBOARD -->
+            <div class="dashboard-title">
+                <h2>Gestión de Colecciones</h2>
+                <p>Administra todas las operaciones del sistema desde un solo lugar</p>
+            </div>
+
+            <!-- GRID DE COLECCIONES -->
+            <div class="collections-grid">
+                <!-- CONTROL ZARPES -->
+                <div class="collection-card control-zarpes" onclick="openCollection('controlZarpes')">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-count">
+                            <div class="count-number" id="countControlZarpes">0</div>
+                            <div class="count-label">Registros</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Control de Zarpes</h3>
+                        <p class="card-description">Gestiona los horarios de salida y llegada de todas las embarcaciones. Control en tiempo real de la operación.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn primary">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="card-btn">
+                            <i class="fas fa-plus"></i> Nuevo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RESERVAS -->
+                <div class="collection-card reservas" onclick="openCollection('reservas')">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="card-count">
+                            <div class="count-number" id="countReservas">0</div>
+                            <div class="count-label">Reservas</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Reservas</h3>
+                        <p class="card-description">Administra las reservas de pasajeros, confirmaciones y cancelaciones. Optimiza la ocupación de las embarcaciones.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn primary">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="card-btn">
+                            <i class="fas fa-plus"></i> Nueva
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EMBARCACIONES -->
+                <div class="collection-card embarcaciones" onclick="openCollection('embarcaciones')">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-ship"></i>
+                        </div>
+                        <div class="card-count">
+                            <div class="count-number" id="countEmbarcaciones">0</div>
+                            <div class="count-label">Embarcaciones</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Embarcaciones</h3>
+                        <p class="card-description">Registra y mantiene la flota de embarcaciones. Controla capacidades, estado y mantenimiento de cada una.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn primary">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="card-btn">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- USUARIOS -->
+                <div class="collection-card users" onclick="openCollection('users')">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-count">
+                            <div class="count-number" id="countUsers">0</div>
+                            <div class="count-label">Usuarios</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Usuarios</h3>
+                        <p class="card-description">Administra operadores, capitanes y personal del sistema. Controla permisos y accesos de usuarios.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn primary">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="card-btn">
+                            <i class="fas fa-user-plus"></i> Crear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VENTAS -->
+                <div class="collection-card ventas" onclick="openCollection('ventas')">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-cash-register"></i>
+                        </div>
+                        <div class="card-count">
+                            <div class="count-number" id="countVentas">0</div>
+                            <div class="count-label">Ventas</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Ventas</h3>
+                        <p class="card-description">Reportes completos de ventas, ingresos y estadísticas financieras. Control total de la operación comercial.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn primary">
+                            <i class="fas fa-chart-line"></i> Reportes
+                        </button>
+                        <button class="card-btn">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // VARIABLES GLOBALES
+        // ===========================
+        let currentSlide = 0;
+        let carouselInterval;
+        let isLoggedIn = false;
+        const videoSrc = 'video.mp4';
+        const videoDuration = 15000; // Duración del video en milisegundos (15 segundos)
+        const imageDuration = 5000;  // Duración de las fotos en milisegundos (5 segundos)
+        const images = [
+            'fotos/guatape1.jpg',
+            'fotos/guatape2.jpg', 
+            'fotos/guatape3.jpg',
+            'fotos/guatape4.jpg',
+            'fotos/guatape5.jpg'
+        ];
+
+        // ===========================
+        // SISTEMA DE LOGIN/LOGOUT
+        // ===========================
+        function showLoginModal() {
+            document.getElementById('loginOverlay').style.display = 'flex';
+            // Pausar carrusel cuando se abre el modal
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginOverlay').style.display = 'none';
+            // Reanudar carrusel
+            startCarousel();
+        }
+
+        function logout() {
+            if (confirm('¿Está seguro que desea cerrar sesión?')) {
+                isLoggedIn = false;
+                document.getElementById('adminDashboard').style.display = 'none';
+                document.getElementById('landingPage').style.display = 'flex';
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                
+                // Reiniciar carrusel en landing
+                initializeCarousel('carousel');
+            }
+        }
+
+        // Manejo del formulario de login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Validación (en producción usar Firebase Auth)
+            if (username === 'admin' && password === 'admin123') {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                
+                setTimeout(() => {
+                    isLoggedIn = true;
+                    hideLoginModal();
+                    showAdminDashboard();
+                }, 1500);
+            } else {
+                showNotification('Credenciales incorrectas', 'error');
+                loginBtn.disabled = false;
+            }
+        });
+
+        function showAdminDashboard() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            document.getElementById('currentUser').textContent = document.getElementById('username').value;
+            
+            // Inicializar carrusel del dashboard
+            initializeCarousel('dashboardCarousel');
+            loadStatistics();
+            loadCollectionCounts();
+            
+            showNotification('¡Bienvenido al panel de administración!', 'success');
+        }
+
+        // ===========================
+        // SISTEMA DE CARRUSEL
+        // ===========================
+        function initializeCarousel(containerId) {
+            const carousel = document.getElementById(containerId);
+            const indicators = containerId === 'carousel' ? 
+                document.getElementById('carouselIndicators') : null;
+            
+            // Limpiar carrusel existente
+            carousel.innerHTML = '';
+            if (indicators) indicators.innerHTML = '';
+            
+            // Resetear currentSlide
+            currentSlide = 0;
+            
+            // Crear slide de video (primer elemento)
+            const videoSlide = document.createElement('div');
+            videoSlide.className = 'carousel-slide video active';
+            const videoId = containerId === 'carousel' ? 'carouselVideo' : 'dashboardVideo';
+            videoSlide.innerHTML = `
+                <video id="${videoId}" muted loop playsinline preload="metadata" style="pointer-events: auto;">
+                    <source src="${videoSrc}" type="video/mp4">
+                    <p style="color: white; text-align: center; padding: 20px;">Video no disponible</p>
+                </video>
+            `;
+            carousel.appendChild(videoSlide);
+            
+            // Crear indicador para video
+            if (indicators) {
+                const videoIndicator = document.createElement('div');
+                videoIndicator.className = 'indicator active';
+                videoIndicator.title = 'Video de bienvenida';
+                videoIndicator.addEventListener('click', () => goToSlide(0, containerId));
+                indicators.appendChild(videoIndicator);
+            }
+            
+            // Crear slides de imágenes
+            images.forEach((image, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'carousel-slide';
+                slide.style.backgroundImage = `url(${image})`;
+                carousel.appendChild(slide);
+                
+                // Crear indicadores para imágenes
+                if (indicators) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'indicator';
+                    indicator.title = `Imagen ${index + 1}`;
+                    indicator.addEventListener('click', () => goToSlide(index + 1, containerId));
+                    indicators.appendChild(indicator);
+                }
+            });
+            
+            // Configurar y reproducir video después de un delay
+            setTimeout(() => {
+                setupVideo(videoId);
+            }, 500);
+            
+            // Iniciar carrusel automático
+            startCarousel();
+        }
+
+        function setupVideo(videoId) {
+            const video = document.getElementById(videoId);
+            if (!video) return;
+
+            // Eventos del video
+            video.addEventListener('loadeddata', () => {
+                console.log('Video cargado correctamente');
+                if (currentSlide === 0) {
+                    playVideoSafely(video);
+                }
+            });
+
+            video.addEventListener('error', (e) => {
+                console.log('Error cargando video:', e);
+            });
+
+            // Intentar cargar el video
+            video.load();
+        }
+
+        function playVideoSafely(video) {
+            if (!video) return;
+            
+            // Cancelar cualquier reproducción anterior
+            video.pause();
+            
+            setTimeout(() => {
+                const playPromise = video.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log('Video reproducido exitosamente');
+                        })
+                        .catch(error => {
+                            console.log('Error autoplay:', error);
+                            // Intentar reproducir al hacer click
+                            video.addEventListener('click', () => {
+                                video.play().catch(e => console.log('Error click play:', e));
+                            }, { once: true });
+                        });
+                }
+            }, 100);
+        }
+
+        function startCarousel() {
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+            // Usar duración específica según el tipo de slide
+            scheduleNextSlide();
+        }
+
+        function scheduleNextSlide() {
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+            
+            // Determinar duración según el slide actual
+            const duration = currentSlide === 0 ? videoDuration : imageDuration;
+            
+            carouselInterval = setTimeout(() => {
+                nextSlide();
+                scheduleNextSlide(); // Programar el siguiente
+            }, duration);
+        }
+
+        function nextSlide() {
+            const activeContainers = [];
+            if (document.getElementById('landingPage').style.display !== 'none') {
+                activeContainers.push('carousel');
+            }
+            if (document.getElementById('adminDashboard').style.display === 'block') {
+                activeContainers.push('dashboardCarousel');
+            }
+
+            activeContainers.forEach(containerId => {
+                const slides = document.querySelectorAll(`#${containerId} .carousel-slide`);
+                const indicators = containerId === 'carousel' ? 
+                    document.querySelectorAll('.indicator') : [];
+                
+                if (slides.length > 0) {
+                    slides[currentSlide].classList.remove('active');
+                    if (indicators.length > 0) {
+                        indicators[currentSlide].classList.remove('active');
+                    }
+                    
+                    // Total de elementos = 1 video + imágenes
+                    const totalSlides = 1 + images.length;
+                    currentSlide = (currentSlide + 1) % totalSlides;
+                    
+                    slides[currentSlide].classList.add('active');
+                    if (indicators.length > 0) {
+                        indicators[currentSlide].classList.add('active');
+                    }
+                    
+                    // Manejar reproducción de video
+                    manageVideoPlayback(containerId);
+                    
+                    // Mostrar información de duración en consola
+                    const currentDuration = currentSlide === 0 ? videoDuration : imageDuration;
+                    console.log(`Slide ${currentSlide}: ${currentSlide === 0 ? 'Video' : 'Imagen'} - Duración: ${currentDuration/1000}s`);
+                }
+            });
+        }
+
+        function goToSlide(index, containerId) {
+            const slides = document.querySelectorAll(`#${containerId} .carousel-slide`);
+            const indicators = containerId === 'carousel' ? 
+                document.querySelectorAll('.indicator') : [];
+            
+            if (slides.length === 0) return;
+            
+            slides[currentSlide].classList.remove('active');
+            if (indicators.length > 0) {
+                indicators[currentSlide].classList.remove('active');
+            }
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            if (indicators.length > 0) {
+                indicators[currentSlide].classList.add('active');
+            }
+            
+            // Manejar reproducción de video
+            setTimeout(() => {
+                manageVideoPlayback(containerId);
+            }, 100);
+        }
+
+        function manageVideoPlayback(containerId) {
+            // Manejar video en el carrusel principal
+            if (containerId === 'carousel' || !containerId) {
+                const video = document.getElementById('carouselVideo');
+                if (video) {
+                    if (currentSlide === 0) {
+                        // Estamos en el slide del video
+                        video.currentTime = 0;
+                        playVideoSafely(video);
+                    } else {
+                        // No estamos en el slide del video
+                        video.pause();
+                    }
+                }
+            }
+            
+            // Manejar video en el dashboard
+            if (containerId === 'dashboardCarousel') {
+                const dashboardVideo = document.getElementById('dashboardVideo');
+                if (dashboardVideo) {
+                    if (currentSlide === 0) {
+                        dashboardVideo.currentTime = 0;
+                        playVideoSafely(dashboardVideo);
+                    } else {
+                        dashboardVideo.pause();
+                    }
+                }
+            }
+        }
+
+        // ===========================
+        // ESTADÍSTICAS Y DATOS
+        // ===========================
+        function loadStatistics() {
+            // Simular carga de estadísticas
+            const stats = {
+                totalVentas: Math.floor(Math.random() * 50) + 10,
+                totalPasajeros: Math.floor(Math.random() * 200) + 50,
+                totalIngresos: Math.floor(Math.random() * 5000000) + 1000000,
+                embarcacionesActivas: Math.floor(Math.random() * 8) + 5
+            };
+            
+            document.getElementById('totalVentas').textContent = stats.totalVentas;
+            document.getElementById('totalPasajeros').textContent = stats.totalPasajeros;
+            document.getElementById('totalIngresos').textContent = `${stats.totalIngresos.toLocaleString()}`;
+            document.getElementById('embarcacionesActivas').textContent = stats.embarcacionesActivas;
+        }
+
+        function loadCollectionCounts() {
+            // Simular contadores de colecciones
+            const counts = {
+                controlZarpes: Math.floor(Math.random() * 100) + 20,
+                reservas: Math.floor(Math.random() * 150) + 30,
+                embarcaciones: Math.floor(Math.random() * 20) + 8,
+                users: Math.floor(Math.random() * 15) + 5,
+                ventas: Math.floor(Math.random() * 500) + 100
+            };
+            
+            document.getElementById('countControlZarpes').textContent = counts.controlZarpes;
+            document.getElementById('countReservas').textContent = counts.reservas;
+            document.getElementById('countEmbarcaciones').textContent = counts.embarcaciones;
+            document.getElementById('countUsers').textContent = counts.users;
+            document.getElementById('countVentas').textContent = counts.ventas;
+        }
+
+        // ===========================
+        // NAVEGACIÓN DE COLECCIONES
+        // ===========================
+        function openCollection(collectionName) {
+            const collectionTitles = {
+                'controlZarpes': 'Control de Zarpes',
+                'reservas': 'Gestión de Reservas',
+                'embarcaciones': 'Administración de Embarcaciones',
+                'users': 'Gestión de Usuarios',
+                'ventas': 'Reportes de Ventas'
+            };
+            
+            showNotification(`Abriendo ${collectionTitles[collectionName]}...`, 'info');
+            
+            // Aquí puedes agregar la lógica para abrir modales o navegar
+            console.log(`Abriendo: ${collectionTitles[collectionName]}`);
+        }
+
+        // ===========================
+        // SISTEMA DE NOTIFICACIONES
+        // ===========================
+        function showNotification(message, type = 'info') {
+            // Crear estilos si no existen
+            if (!document.getElementById('notificationStyles')) {
+                const notificationStyles = document.createElement('style');
+                notificationStyles.id = 'notificationStyles';
+                notificationStyles.textContent = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: rgba(30, 41, 59, 0.95);
+                        color: white;
+                        padding: 16px 20px;
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        z-index: 3000;
+                        animation: slideInRight 0.3s ease;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(148, 163, 184, 0.2);
+                        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                        max-width: 400px;
+                    }
+                    
+                    .notification.success {
+                        border-left: 4px solid #10b981;
+                    }
+                    
+                    .notification.error {
+                        border-left: 4px solid #ef4444;
+                    }
+                    
+                    .notification.info {
+                        border-left: 4px solid #06b6d4;
+                    }
+                    
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(notificationStyles);
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // ===========================
+        // INICIALIZACIÓN
+        // ===========================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar carrusel de la página de inicio
+            initializeCarousel('carousel');
+            console.log('Sistema de administración inicializado');
+        });
+
+        // Manejar cierre del modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('loginOverlay').style.display === 'flex') {
+                hideLoginModal();
+            }
+        });
+    </script>
+</body>
+</html>
