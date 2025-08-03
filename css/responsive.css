@@ -1,0 +1,498 @@
+/* ===========================
+   RESPONSIVE DESIGN
+=========================== */
+
+/* Extra Large screens (1200px y más) */
+@media (max-width: 1200px) {
+    .info-section {
+        padding: 60px 40px;
+    }
+    
+    .dashboard-container {
+        padding: 40px 40px;
+    }
+}
+
+/* Tablets y pantallas medianas (768px - 1199px) */
+@media (max-width: 768px) {
+    /* Headers responsivos */
+    .landing-header,
+    .dashboard-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 16px 20px;
+    }
+
+    .header-left {
+        justify-content: center;
+    }
+
+    .header-right {
+        justify-content: center;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        height: 60vh;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .cta-btn {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+
+    /* Dashboard Hero */
+    .dashboard-hero {
+        height: 30vh;
+    }
+
+    /* Info Section */
+    .info-section {
+        padding: 60px 24px;
+    }
+
+    .info-title {
+        font-size: 2rem;
+    }
+
+    .info-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    /* Dashboard */
+    .dashboard-container {
+        padding: 40px 24px;
+    }
+
+    .dashboard-title h2 {
+        font-size: 2rem;
+    }
+
+    .collections-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Modales */
+    .zarpes-modal {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 16px;
+        max-height: 100vh;
+    }
+
+    .zarpes-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .zarpes-title {
+        font-size: 1.5rem;
+    }
+
+    .zarpes-actions {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Filtros */
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-input,
+    .filter-select {
+        min-width: unset;
+        width: 100%;
+    }
+
+    /* Tabla */
+    .zarpes-table {
+        font-size: 0.8rem;
+    }
+
+    .zarpes-table th,
+    .zarpes-table td {
+        padding: 8px 6px;
+    }
+
+    /* Login Modal */
+    .login-modal {
+        width: 95%;
+        padding: 24px;
+        margin: 20px;
+    }
+
+    .login-title {
+        font-size: 1.3rem;
+    }
+
+    .login-logo {
+        font-size: 2.5rem;
+    }
+}
+
+/* Móviles pequeños (480px y menos) */
+@media (max-width: 480px) {
+    /* Headers muy compactos */
+    .landing-header,
+    .dashboard-header {
+        padding: 12px 16px;
+    }
+
+    .app-title {
+        font-size: 1rem;
+    }
+
+    .app-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .login-access-btn {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    /* Hero muy compacto */
+    .hero-section {
+        height: 50vh;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-description {
+        font-size: 0.9rem;
+    }
+
+    .cta-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Info section compacta */
+    .info-section {
+        padding: 40px 16px;
+    }
+
+    .info-title {
+        font-size: 1.8rem;
+    }
+
+    .info-subtitle {
+        font-size: 1rem;
+    }
+
+    .feature-card {
+        padding: 24px;
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .feature-title {
+        font-size: 1.1rem;
+    }
+
+    /* Dashboard compacto */
+    .dashboard-container {
+        padding: 24px 16px;
+    }
+
+    .dashboard-title h2 {
+        font-size: 1.8rem;
+    }
+
+    .dashboard-title p {
+        font-size: 1rem;
+    }
+
+    /* Colecciones muy compactas */
+    .collection-card {
+        padding: 20px;
+    }
+
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+    }
+
+    .count-number {
+        font-size: 1.5rem;
+    }
+
+    /* Modales de pantalla completa */
+    .zarpes-modal {
+        padding: 12px;
+    }
+
+    .zarpes-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .zarpes-title {
+        font-size: 1.2rem;
+    }
+
+    .zarpes-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .export-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    /* Tabla ultra compacta */
+    .zarpes-table {
+        font-size: 0.7rem;
+    }
+
+    .zarpes-table th,
+    .zarpes-table td {
+        padding: 6px 4px;
+    }
+
+    /* Login modal compacto */
+    .login-modal {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 20px;
+        margin: 0;
+    }
+
+    .login-header {
+        margin-bottom: 24px;
+    }
+
+    .login-logo {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .login-title {
+        font-size: 1.2rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .form-input {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+
+    .login-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Notificaciones compactas */
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Pantallas muy pequeñas (320px y menos) */
+@media (max-width: 320px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .info-title {
+        font-size: 1.6rem;
+    }
+
+    .dashboard-title h2 {
+        font-size: 1.6rem;
+    }
+
+    .feature-card {
+        padding: 20px;
+    }
+
+    .collection-card {
+        padding: 16px;
+    }
+
+    .zarpes-modal {
+        padding: 8px;
+    }
+
+    .zarpes-table {
+        font-size: 0.65rem;
+    }
+
+    .zarpes-table th,
+    .zarpes-table td {
+        padding: 4px 2px;
+    }
+}
+
+/* Orientación horizontal en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero-section {
+        height: 80vh;
+    }
+
+    .dashboard-hero {
+        height: 60vh;
+    }
+
+    .info-section {
+        padding: 40px 24px;
+    }
+
+    .dashboard-container {
+        padding: 30px 24px;
+    }
+
+    .zarpes-modal {
+        max-height: 95vh;
+        padding: 16px;
+    }
+
+    .login-modal {
+        max-height: 95vh;
+        overflow-y: auto;
+    }
+}
+
+/* Mejoras para tablets en orientación horizontal */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .collections-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .zarpes-modal {
+        width: 90%;
+        height: auto;
+        max-height: 85vh;
+        border-radius: 20px;
+        padding: 24px;
+    }
+}
+
+/* Optimizaciones para impresión */
+@media print {
+    .landing-page,
+    .admin-dashboard {
+        background: white !important;
+        color: black !important;
+    }
+
+    .login-overlay,
+    .zarpes-overlay,
+    .connection-status,
+    .notification {
+        display: none !important;
+    }
+
+    .zarpes-table {
+        color: black !important;
+    }
+
+    .zarpes-table th {
+        background: #f3f4f6 !important;
+        color: black !important;
+    }
+
+    .category-badge {
+        border: 1px solid #ccc !important;
+        color: black !important;
+        background: #f9f9f9 !important;
+    }
+}
+
+/* Accesibilidad - Reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .carousel-slide {
+        transition: none !important;
+    }
+
+    .loading-spinner {
+        animation: none !important;
+    }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+    .collection-card {
+        border: 2px solid #ffffff;
+    }
+
+    .feature-card {
+        border: 2px solid #ffffff;
+    }
+
+    .zarpes-table th {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+
+    .category-badge {
+        border: 2px solid currentColor !important;
+    }
+}
+
+/* Modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+    /* Los estilos ya están optimizados para modo oscuro */
+    /* Aquí se pueden agregar ajustes adicionales si es necesario */
+}

@@ -1,0 +1,450 @@
+/* ===========================
+   LOGIN MODAL
+=========================== */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.login-modal {
+    background: rgba(30, 41, 59, 0.98);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    width: 90%;
+    max-width: 400px;
+    backdrop-filter: blur(20px);
+    animation: slideInUp 0.5s ease;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo {
+    color: #06b6d4;
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.login-title {
+    color: #f8fafc;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-input {
+    background: rgba(51, 65, 85, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: #f8fafc;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    background: rgba(51, 65, 85, 0.9);
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+}
+
+.login-btn:disabled {
+    background: rgba(71, 85, 105, 0.6);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* ===========================
+   MODAL DE REGISTROS
+=========================== */
+.zarpes-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+    padding: 20px;
+}
+
+.zarpes-modal {
+    background: rgba(30, 41, 59, 0.98);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    backdrop-filter: blur(20px);
+    animation: slideInUp 0.5s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.zarpes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.zarpes-title {
+    color: #f8fafc;
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.zarpes-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-btn.excel {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.export-btn.pdf {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.export-btn:disabled {
+    background: rgba(71, 85, 105, 0.6);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.zarpes-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===========================
+   ESTADOS DE CARGA
+=========================== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(6, 182, 212, 0.3);
+    border-top: 3px solid #06b6d4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    color: #fca5a5;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.no-data-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* ===========================
+   TABLA DE DATOS
+=========================== */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.zarpes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.zarpes-table th {
+    background: rgba(30, 41, 59, 0.8);
+    color: #f8fafc;
+    font-weight: 600;
+    padding: 16px 12px;
+    text-align: left;
+    border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.zarpes-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    color: #cbd5e1;
+    transition: background-color 0.2s ease;
+}
+
+.zarpes-table tbody tr:hover {
+    background: rgba(6, 182, 212, 0.1);
+}
+
+.zarpes-table tbody tr:nth-child(even) {
+    background: rgba(51, 65, 85, 0.3);
+}
+
+.zarpes-table tbody tr:nth-child(even):hover {
+    background: rgba(6, 182, 212, 0.15);
+}
+
+/* ===========================
+   FILTROS
+=========================== */
+.filter-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-input {
+    background: rgba(51, 65, 85, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #f8fafc;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+}
+
+.filter-select {
+    background: rgba(51, 65, 85, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #f8fafc;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+/* ===========================
+   BADGES DE CATEGORÍA
+=========================== */
+.category-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.category-carguero {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.category-pasajeros {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.category-turismo {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.category-sin-categoria {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* ===========================
+   SISTEMA DE NOTIFICACIONES
+=========================== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(30, 41, 59, 0.95);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 3000;
+    animation: slideInRight 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+}
+
+.notification.success {
+    border-left: 4px solid #10b981;
+}
+
+.notification.error {
+    border-left: 4px solid #ef4444;
+}
+
+.notification.info {
+    border-left: 4px solid #06b6d4;
+}
+
+.notification.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
