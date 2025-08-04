@@ -58,307 +58,7 @@ class FilterManager {
         const categories = this.getUniqueCategories();
         
         // Actualizar select de categorías en zarpes
-        if (!filter) {
-            showError(`Filtro "${name}" no encontrado`);
-            return false;
-        }
-
-        // Aplicar filtros guardados
-        this.activeFilters[filter.type] = { ...filter.filters };
-        
-        // Actualizar elementos UI
-        this.updateFilterUI(filter.type, filter.filters);
-        
-        // Aplicar filtros
-        this.applyFilters(filter.type);
-        
-        showInfo(`Filtro "${name}" aplicado exitosamente`);
-        return true;
-    }
-
-    updateFilterUI(type, filters) {
-        const elements = type === 'zarpes' ? this.zarpesElements : this.categoriasElements;
-        
-        // Actualizar campos de búsqueda
-        if (elements.searchFilter && filters.search !== undefined) {
-            elements.searchFilter.value = filters.search;
-        }
-        if (elements.searchCategoriasFilter && filters.search !== undefined) {
-            elements.searchCategoriasFilter.value = filters.search;
-        }
-        
-        // Actualizar selectores de categoría
-        if (elements.categoryFilter && filters.category !== undefined) {
-            elements.categoryFilter.value = filters.category;
-        }
-        if (elements.categoryAnalysisFilter && filters.category !== undefined) {
-            elements.categoryAnalysisFilter.value = filters.category;
-        }
-        
-        // Actualizar campos de fecha
-        if (elements.dateFilter && filters.date !== undefined) {
-            elements.dateFilter.value = filters.date;
-        }
-        if (elements.dateCategoriasFilter && filters.date !== undefined) {
-            elements.dateCategoriasFilter.value = filters.date;
-        }
-    }
-
-    deleteSavedFilter(name) {
-        const savedFilters = this.getSavedFilters();
-        
-        if (savedFilters[name]) {
-            delete savedFilters[name];
-            localStorage.setItem('embarcaciones_saved_filters', JSON.stringify(savedFilters));
-            showInfo(`Filtro "${name}" eliminado`);
-            return true;
-        }
-        
-        return false;
-    }
-
-    // ===========================
-    // LIMPIEZA DE FILTROS
-    // ===========================
-    clearFilters(type) {
-        console.log(`🧹 Limpiando filtros para ${type}`);
-        
-        // Resetear filtros activos
-        this.activeFilters[type] = {
-            search: '',
-            category: '',
-            date: '',
-            administrador: ''
-        };
-        
-        // Limpiar elementos UI
-        const elements = type === 'zarpes' ? this.zarpesElements : this.categoriasElements;
-        
-        Object.values(elements).forEach(element => {
-            if (element) {
-                if (element.type === 'text' || element.type === 'date') {
-                    element.value = '';
-                } else if (element.tagName === 'SELECT') {
-                    element.selectedIndex = 0;
-                }
-            }
-        });
-        
-        // Restaurar datos originales
-        if (type === 'zarpes') {
-            appState.filteredZarpesData = [...appState.zarpesData];
-            if (window.dataManager) {
-                window.dataManager.populateZarpesTable(appState.filteredZarpesData);
-            }
-        } else {
-            appState.filteredCategoriasData = [...appState.categoriasData];
-            if (window.dataManager) {
-                window.dataManager.populateCategoriasTable(appState.filteredCategoriasData);
-            }
-        }
-        
-        this.updateFilteredResultsCount(type);
-        showInfo('Filtros limpiados');
-    }
-
-    clearAllFilters() {
-        this.clearFilters('zarpes');
-        this.clearFilters('categorias');
-    }
-
-    // ===========================
-    // BÚSQUEDA INTELIGENTE
-    // ===========================
-    performIntelligentSearch(query, type = 'zarpes') {
-        console.log(`🔍 Búsqueda inteligente: "${query}" en ${type}`);
-        
-        const sourceData = type === 'zarpes' ? appState.zarpesData : appState.categoriasData;
-        const results = [];
-        
-        // Dividir query en términos
-        const terms = query.toLowerCase().split(/\s+/).filter(term => term.length > 0);
-        
-        sourceData.forEach(item => {
-            let score = 0;
-            let matches = [];
-            
-            // Buscar en diferentes campos con diferentes pesos
-            const searchFields = [
-                { field: 'embarcacion', weight: 3, value: item.embarcacion },
-                { field: 'categoria', weight: 2, value: item.categoria },
-                { field: 'administrador', weight: 2, value: item.administrador },
-                { field: 'embarcacionId', weight: 1, value: item.embarcacionId },
-                { field: 'posicionDesembarque', weight: 1, value: item.posicionDesembarque }
-            ];
-            
-            terms.forEach(term => {
-                searchFields.forEach(({ field, weight, value }) => {
-                    if (value && value.toString().toLowerCase().includes(term)) {
-                        score += weight;
-                        if (!matches.includes(field)) {
-                            matches.push(field);
-                        }
-                    }
-                });
-            });
-            
-            if (score > 0) {
-                results.push({
-                    item,
-                    score,
-                    matches,
-                    relevance: score / terms.length
-                });
-            }
-        });
-        
-        // Ordenar por relevancia
-        results.sort((a, b) => b.relevance - a.relevance);
-        
-        return results;
-    }
-
-    // ===========================
-    // EXPORTACIÓN DE FILTROS
-    // ===========================
-    exportFilteredData(type, format = 'excel') {
-        const data = type === 'zarpes' ? appState.filteredZarpesData : appState.filteredCategoriasData;
-        
-        if (!data || data.length === 0) {
-            showError('No hay datos filtrados para exportar');
-            return;
-        }
-        
-        const filters = this.activeFilters[type];
-        const activeFiltersList = Object.entries(filters)
-            .filter(([key, value]) => value && value.trim())
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-        
-        const filename = `${type}-filtrados-${data.length}-registros`;
-        
-        if (window.exportService) {
-            const options = {
-                format,
-                title: `${type} Filtrados (${data.length} registros)`,
-                subtitle: activeFiltersList ? `Filtros aplicados: ${activeFiltersList}` : 'Sin filtros activos'
-            };
-            
-            window.exportService.exportCustomData(data, filename, options);
-        } else {
-            showError('Servicio de exportación no disponible');
-        }
-    }
-
-    // ===========================
-    // ACTUALIZACIÓN AUTOMÁTICA
-    // ===========================
-    refreshFilters() {
-        console.log('🔄 Actualizando opciones de filtros...');
-        
-        // Actualizar opciones de categorías
-        this.initializeCategoryOptions();
-        
-        // Reaplicar filtros actuales
-        this.applyFilters('zarpes');
-        this.applyFilters('categorias');
-        
-        showInfo('Filtros actualizados');
-    }
-
-    // ===========================
-    // MÉTODOS PÚBLICOS
-    // ===========================
-    getActiveFilters(type) {
-        return this.activeFilters[type];
-    }
-
-    hasActiveFilters(type) {
-        const filters = this.activeFilters[type];
-        return Object.values(filters).some(value => value && value.trim());
-    }
-
-    getFilteredDataCount(type) {
-        return type === 'zarpes' ? appState.filteredZarpesData.length : appState.filteredCategoriasData.length;
-    }
-
-    setFilter(type, filterKey, value) {
-        this.updateFilter(type, filterKey, value);
-        this.updateFilterUI(type, this.activeFilters[type]);
-        this.applyFilters(type);
-    }
-
-    // ===========================
-    // CLEANUP
-    // ===========================
-    destroy() {
-        // Limpiar todos los filtros
-        this.clearAllFilters();
-        
-        // Reset referencias
-        this.zarpesElements = {};
-        this.categoriasElements = {};
-        this.activeFilters = {
-            zarpes: { search: '', category: '', date: '', administrador: '' },
-            categorias: { search: '', category: '', date: '', administrador: '' }
-        };
-        
-        console.log('FilterManager destruido');
-    }
-}
-
-// Crear instancia global
-const filterManager = new FilterManager();
-
-// Exportar manager y métodos principales
-export { filterManager };
-
-export const applyFilters = (type) => {
-    return filterManager.applyFilters(type);
-};
-
-export const clearFilters = (type) => {
-    return filterManager.clearFilters(type);
-};
-
-export const setFilter = (type, filterKey, value) => {
-    return filterManager.setFilter(type, filterKey, value);
-};
-
-export const getActiveFilters = (type) => {
-    return filterManager.getActiveFilters(type);
-};
-
-export const hasActiveFilters = (type) => {
-    return filterManager.hasActiveFilters(type);
-};
-
-export const performIntelligentSearch = (query, type) => {
-    return filterManager.performIntelligentSearch(query, type);
-};
-
-export const applyAdvancedFilters = (type, filters) => {
-    return filterManager.applyAdvancedFilters(type, filters);
-};
-
-export const saveFilter = (name, type, filters) => {
-    return filterManager.saveFilter(name, type, filters);
-};
-
-export const loadSavedFilter = (name) => {
-    return filterManager.loadSavedFilter(name);
-};
-
-export const exportFilteredData = (type, format) => {
-    return filterManager.exportFilteredData(type, format);
-};
-
-export const refreshFilters = () => {
-    return filterManager.refreshFilters();
-};
-
-// Hacer disponible globalmente
-window.filterManager = filterManager; (this.zarpesElements.categoryFilter) {
+        if (this.zarpesElements.categoryFilter) {
             this.populateCategorySelect(this.zarpesElements.categoryFilter, categories);
         }
 
@@ -766,4 +466,304 @@ window.filterManager = filterManager; (this.zarpesElements.categoryFilter) {
         const savedFilters = this.getSavedFilters();
         const filter = savedFilters[name];
         
-        if
+        if (!filter) {
+            showError(`Filtro "${name}" no encontrado`);
+            return false;
+        }
+
+        // Aplicar filtros guardados
+        this.activeFilters[filter.type] = { ...filter.filters };
+        
+        // Actualizar elementos UI
+        this.updateFilterUI(filter.type, filter.filters);
+        
+        // Aplicar filtros
+        this.applyFilters(filter.type);
+        
+        showInfo(`Filtro "${name}" aplicado exitosamente`);
+        return true;
+    }
+
+    updateFilterUI(type, filters) {
+        const elements = type === 'zarpes' ? this.zarpesElements : this.categoriasElements;
+        
+        // Actualizar campos de búsqueda
+        if (elements.searchFilter && filters.search !== undefined) {
+            elements.searchFilter.value = filters.search;
+        }
+        if (elements.searchCategoriasFilter && filters.search !== undefined) {
+            elements.searchCategoriasFilter.value = filters.search;
+        }
+        
+        // Actualizar selectores de categoría
+        if (elements.categoryFilter && filters.category !== undefined) {
+            elements.categoryFilter.value = filters.category;
+        }
+        if (elements.categoryAnalysisFilter && filters.category !== undefined) {
+            elements.categoryAnalysisFilter.value = filters.category;
+        }
+        
+        // Actualizar campos de fecha
+        if (elements.dateFilter && filters.date !== undefined) {
+            elements.dateFilter.value = filters.date;
+        }
+        if (elements.dateCategoriasFilter && filters.date !== undefined) {
+            elements.dateCategoriasFilter.value = filters.date;
+        }
+    }
+
+    deleteSavedFilter(name) {
+        const savedFilters = this.getSavedFilters();
+        
+        if (savedFilters[name]) {
+            delete savedFilters[name];
+            localStorage.setItem('embarcaciones_saved_filters', JSON.stringify(savedFilters));
+            showInfo(`Filtro "${name}" eliminado`);
+            return true;
+        }
+        
+        return false;
+    }
+
+    // ===========================
+    // LIMPIEZA DE FILTROS
+    // ===========================
+    clearFilters(type) {
+        console.log(`🧹 Limpiando filtros para ${type}`);
+        
+        // Resetear filtros activos
+        this.activeFilters[type] = {
+            search: '',
+            category: '',
+            date: '',
+            administrador: ''
+        };
+        
+        // Limpiar elementos UI
+        const elements = type === 'zarpes' ? this.zarpesElements : this.categoriasElements;
+        
+        Object.values(elements).forEach(element => {
+            if (element) {
+                if (element.type === 'text' || element.type === 'date') {
+                    element.value = '';
+                } else if (element.tagName === 'SELECT') {
+                    element.selectedIndex = 0;
+                }
+            }
+        });
+        
+        // Restaurar datos originales
+        if (type === 'zarpes') {
+            appState.filteredZarpesData = [...appState.zarpesData];
+            if (window.dataManager) {
+                window.dataManager.populateZarpesTable(appState.filteredZarpesData);
+            }
+        } else {
+            appState.filteredCategoriasData = [...appState.categoriasData];
+            if (window.dataManager) {
+                window.dataManager.populateCategoriasTable(appState.filteredCategoriasData);
+            }
+        }
+        
+        this.updateFilteredResultsCount(type);
+        showInfo('Filtros limpiados');
+    }
+
+    clearAllFilters() {
+        this.clearFilters('zarpes');
+        this.clearFilters('categorias');
+    }
+
+    // ===========================
+    // BÚSQUEDA INTELIGENTE
+    // ===========================
+    performIntelligentSearch(query, type = 'zarpes') {
+        console.log(`🔍 Búsqueda inteligente: "${query}" en ${type}`);
+        
+        const sourceData = type === 'zarpes' ? appState.zarpesData : appState.categoriasData;
+        const results = [];
+        
+        // Dividir query en términos
+        const terms = query.toLowerCase().split(/\s+/).filter(term => term.length > 0);
+        
+        sourceData.forEach(item => {
+            let score = 0;
+            let matches = [];
+            
+            // Buscar en diferentes campos con diferentes pesos
+            const searchFields = [
+                { field: 'embarcacion', weight: 3, value: item.embarcacion },
+                { field: 'categoria', weight: 2, value: item.categoria },
+                { field: 'administrador', weight: 2, value: item.administrador },
+                { field: 'embarcacionId', weight: 1, value: item.embarcacionId },
+                { field: 'posicionDesembarque', weight: 1, value: item.posicionDesembarque }
+            ];
+            
+            terms.forEach(term => {
+                searchFields.forEach(({ field, weight, value }) => {
+                    if (value && value.toString().toLowerCase().includes(term)) {
+                        score += weight;
+                        if (!matches.includes(field)) {
+                            matches.push(field);
+                        }
+                    }
+                });
+            });
+            
+            if (score > 0) {
+                results.push({
+                    item,
+                    score,
+                    matches,
+                    relevance: score / terms.length
+                });
+            }
+        });
+        
+        // Ordenar por relevancia
+        results.sort((a, b) => b.relevance - a.relevance);
+        
+        return results;
+    }
+
+    // ===========================
+    // EXPORTACIÓN DE FILTROS
+    // ===========================
+    exportFilteredData(type, format = 'excel') {
+        const data = type === 'zarpes' ? appState.filteredZarpesData : appState.filteredCategoriasData;
+        
+        if (!data || data.length === 0) {
+            showError('No hay datos filtrados para exportar');
+            return;
+        }
+        
+        const filters = this.activeFilters[type];
+        const activeFiltersList = Object.entries(filters)
+            .filter(([key, value]) => value && value.trim())
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+        
+        const filename = `${type}-filtrados-${data.length}-registros`;
+        
+        if (window.exportService) {
+            const options = {
+                format,
+                title: `${type} Filtrados (${data.length} registros)`,
+                subtitle: activeFiltersList ? `Filtros aplicados: ${activeFiltersList}` : 'Sin filtros activos'
+            };
+            
+            window.exportService.exportCustomData(data, filename, options);
+        } else {
+            showError('Servicio de exportación no disponible');
+        }
+    }
+
+    // ===========================
+    // ACTUALIZACIÓN AUTOMÁTICA
+    // ===========================
+    refreshFilters() {
+        console.log('🔄 Actualizando opciones de filtros...');
+        
+        // Actualizar opciones de categorías
+        this.initializeCategoryOptions();
+        
+        // Reaplicar filtros actuales
+        this.applyFilters('zarpes');
+        this.applyFilters('categorias');
+        
+        showInfo('Filtros actualizados');
+    }
+
+    // ===========================
+    // MÉTODOS PÚBLICOS
+    // ===========================
+    getActiveFilters(type) {
+        return this.activeFilters[type];
+    }
+
+    hasActiveFilters(type) {
+        const filters = this.activeFilters[type];
+        return Object.values(filters).some(value => value && value.trim());
+    }
+
+    getFilteredDataCount(type) {
+        return type === 'zarpes' ? appState.filteredZarpesData.length : appState.filteredCategoriasData.length;
+    }
+
+    setFilter(type, filterKey, value) {
+        this.updateFilter(type, filterKey, value);
+        this.updateFilterUI(type, this.activeFilters[type]);
+        this.applyFilters(type);
+    }
+
+    // ===========================
+    // CLEANUP
+    // ===========================
+    destroy() {
+        // Limpiar todos los filtros
+        this.clearAllFilters();
+        
+        // Reset referencias
+        this.zarpesElements = {};
+        this.categoriasElements = {};
+        this.activeFilters = {
+            zarpes: { search: '', category: '', date: '', administrador: '' },
+            categorias: { search: '', category: '', date: '', administrador: '' }
+        };
+        
+        console.log('FilterManager destruido');
+    }
+}
+
+// Crear instancia global
+const filterManager = new FilterManager();
+
+// Exportar manager y métodos principales
+export { filterManager };
+
+export const applyFilters = (type) => {
+    return filterManager.applyFilters(type);
+};
+
+export const clearFilters = (type) => {
+    return filterManager.clearFilters(type);
+};
+
+export const setFilter = (type, filterKey, value) => {
+    return filterManager.setFilter(type, filterKey, value);
+};
+
+export const getActiveFilters = (type) => {
+    return filterManager.getActiveFilters(type);
+};
+
+export const hasActiveFilters = (type) => {
+    return filterManager.hasActiveFilters(type);
+};
+
+export const performIntelligentSearch = (query, type) => {
+    return filterManager.performIntelligentSearch(query, type);
+};
+
+export const applyAdvancedFilters = (type, filters) => {
+    return filterManager.applyAdvancedFilters(type, filters);
+};
+
+export const saveFilter = (name, type, filters) => {
+    return filterManager.saveFilter(name, type, filters);
+};
+
+export const loadSavedFilter = (name) => {
+    return filterManager.loadSavedFilter(name);
+};
+
+export const exportFilteredData = (type, format) => {
+    return filterManager.exportFilteredData(type, format);
+};
+
+export const refreshFilters = () => {
+    return filterManager.refreshFilters();
+};
+
+// Hacer disponible globalmente
+window.filterManager = filterManager;

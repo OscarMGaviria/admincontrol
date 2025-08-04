@@ -63,6 +63,13 @@ class FirebaseService {
 
     async testConnection() {
         try {
+            // Si no hay usuario autenticado, solo verificar que Firebase está inicializado
+            if (!appState.auth?.currentUser) {
+                console.log('🔥 Firebase inicializado sin usuario - omitiendo test de datos');
+                return true;
+            }
+            
+            // Solo hacer query si hay usuario autenticado
             const testQuery = query(
                 collection(appState.db, appConfig.collections.controlZarpes), 
                 orderBy('fechaHora', 'desc')
@@ -176,6 +183,45 @@ class FirebaseService {
         }
     }
 
+
+
+    async loadVentasData() {
+        try {
+            console.log('🔥 Firebase: Cargando datos de ventas...');
+            
+            // Solo verificar que Firebase esté inicializado, NO verificar usuario
+            if (!appState.isFirebaseInitialized) {
+                throw new Error('Firebase no está inicializado');
+            }
+            
+            if (!appState.db) {
+                throw new Error('Base de datos no disponible');
+            }
+            
+            const ventasRef = collection(appState.db, 'ventas');
+            const q = query(ventasRef, orderBy('timestamp', 'desc'));
+            
+            console.log('🔥 Ejecutando query a colección ventas...');
+            const querySnapshot = await getDocs(q);
+            
+            const ventasData = [];
+            querySnapshot.forEach((doc) => {
+                ventasData.push({ 
+                    id: doc.id, 
+                    ...doc.data() 
+                });
+            });
+
+            console.log('✅ Ventas cargadas desde Firebase:', ventasData.length, 'registros');
+            return ventasData;
+            
+        } catch (error) {
+            console.error('❌ Error en Firebase loadVentasData:', error);
+            throw this.handleFirebaseError(error);
+        }
+    }
+
+
     // ===========================
     // VALIDACIONES Y MANEJO DE ERRORES
     // ===========================
@@ -184,9 +230,6 @@ class FirebaseService {
             throw new Error('Firebase no está inicializado');
         }
 
-        if (!appState.auth.currentUser) {
-            throw new Error('Usuario no autenticado');
-        }
     }
 
     handleFirebaseError(error) {
@@ -333,6 +376,75 @@ class FirebaseService {
     getAuth() {
         return appState.auth;
     }
+
+
+
+    // AGREGAR este método en la clase FirebaseService:
+    async loadVentasData() {
+        try {
+            this.validateFirebaseState();
+            
+            const ventasRef = collection(appState.db, 'ventas');
+            const q = query(ventasRef, orderBy('timestamp', 'desc'));
+            const querySnapshot = await getDocs(q);
+            
+            const ventasData = [];
+            querySnapshot.forEach((doc) => {
+                ventasData.push({ 
+                    id: doc.id, 
+                    ...doc.data() 
+                });
+            });
+
+            console.log('Ventas cargadas:', ventasData.length, 'registros');
+            return ventasData;
+            
+        } catch (error) {
+            console.error('Error cargando ventas:', error);
+            throw this.handleFirebaseError(error);
+        }
+    }
+
+
+    async loadReservasData() {
+        try {
+            console.log('🔥 Firebase: Cargando datos de reservas...');
+            
+            if (!appState.isFirebaseInitialized) {
+                throw new Error('Firebase no está inicializado');
+            }
+            
+            if (!appState.db) {
+                throw new Error('Base de datos no disponible');
+            }
+            
+            const reservasRef = collection(appState.db, 'Reservas');
+            const q = query(reservasRef, orderBy('fecha-hora', 'desc'));
+            
+            console.log('🔥 Ejecutando query a colección Reservas...');
+            const querySnapshot = await getDocs(q);
+            
+            const reservasData = [];
+            querySnapshot.forEach((doc) => {
+                reservasData.push({ 
+                    id: doc.id, 
+                    ...doc.data() 
+                });
+            });
+
+            console.log('✅ Reservas cargadas desde Firebase:', reservasData.length, 'registros');
+            return reservasData;
+            
+        } catch (error) {
+            console.error('❌ Error en Firebase loadReservasData:', error);
+            throw this.handleFirebaseError(error);
+        }
+    }
+
+
+
+
+    
 }
 
 // Crear instancia global
@@ -363,6 +475,15 @@ export const testFirebaseConnection = () => {
 
 export const cleanupFirebase = () => {
     return firebaseService.cleanup();
+};
+
+// AGREGAR esta línea en las exportaciones (al final del archivo):
+export const loadVentasData = () => {
+    return firebaseService.loadVentasData();
+};
+
+export const loadReservasData = () => {
+    return firebaseService.loadReservasData();
 };
 
 // Hacer disponible globalmente

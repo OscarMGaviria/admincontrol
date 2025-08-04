@@ -18,15 +18,14 @@ class DataManager {
     constructor() {
         this.tableColumns = {
             zarpes: [
-                { key: 'embarcacionId', header: 'ID', type: 'text', className: 'text-center' },
+                { key: 'index', header: '#', type: 'number', className: 'text-center' },
                 { key: 'embarcacion', header: 'Embarcación', type: 'text', className: 'font-bold' },
                 { key: 'administrador', header: 'Administrador', type: 'text' },
                 { key: 'categoria', header: 'Categoría', type: 'category' },
                 { key: 'fechaHora', header: 'Fecha y Hora', type: 'date' },
                 { key: 'cantidadPasajeros', header: 'Pasajeros', type: 'number', className: 'text-center font-bold' },
                 { key: 'valorPorPersona', header: 'Valor/Persona', type: 'currency' },
-                { key: 'valorTotal', header: 'Valor Total', type: 'currency', className: 'font-bold text-green-400' },
-                { key: 'posicionDesembarque', header: 'Pos. Desembarque', type: 'text', className: 'text-center' }
+                { key: 'valorTotal', header: 'Valor Total', type: 'currency', className: 'font-bold text-green-400' }
             ]
         };
         
@@ -101,9 +100,10 @@ class DataManager {
             
             // Actualizar contadores en las tarjetas
             updateCollectionCount('countControlZarpes', stats.totalRegistros, true);
-            updateCollectionCount('countCategorias', stats.categoriasUnicas, true);
+            updateCollectionCount('countventas', stats.categoriasUnicas, true);
             updateCollectionCount('countEmbarcaciones', stats.totalRegistros > 0 ? Math.ceil(stats.totalRegistros / 10) : 0, true);
             updateCollectionCount('countFinanciero', `$${Math.round(stats.totalIngresos/1000)}K`, false);
+            updateCollectionCount('countreservas', stats.totalRegistros > 0 ? Math.ceil(stats.totalRegistros / 5) : 0, true);
             
             console.log('✅ Estadísticas actualizadas:', stats);
             return stats;
@@ -207,6 +207,7 @@ class DataManager {
         this.populateZarpesTable(data || appState.filteredZarpesData);
     }
 
+
     populateZarpesTable(data) {
         const tbody = document.getElementById('zarpesTableBody');
         if (!tbody) return;
@@ -243,7 +244,7 @@ class DataManager {
             const valorTotal = registro.valorTotal ? `$${registro.valorTotal.toLocaleString('es-CO')}` : '$0';
 
             row.innerHTML = `
-                <td class="text-center">${registro.embarcacionId || registro.id || index + 1}</td>
+                <td class="text-center"><strong>${index + 1}</strong></td>
                 <td><strong>${registro.embarcacion || 'N/A'}</strong></td>
                 <td>${registro.administrador || 'N/A'}</td>
                 <td>${categoriaBadge}</td>
@@ -251,12 +252,12 @@ class DataManager {
                 <td class="text-center"><span style="font-weight: bold; color: #06b6d4;">${registro.cantidadPasajeros || '0'}</span></td>
                 <td>${valorPorPersona}</td>
                 <td><span style="font-weight: bold; color: #10b981;">${valorTotal}</span></td>
-                <td class="text-center">${registro.posicionDesembarque || 'N/A'}</td>
             `;
             
             tbody.appendChild(row);
         });
     }
+
 
     // ===========================
     // CARGA DE DATOS DE CATEGORÍAS PARA MODAL
@@ -451,24 +452,68 @@ class DataManager {
             });
         }
 
-        // Tarjeta de Categorías
-        const categoriasCard = document.getElementById('categoriasCard');
-        const analyzeCategoriasBtn = document.getElementById('analyzeCategoriasBtn');
+        // Tarjeta de Ventas
+        const ventasCard = document.getElementById('ventasCard');
+        const analyzeVentasBtn = document.getElementById('analyzeventasBtn');
+        const exportVentasBtn = document.getElementById('exportventasBtn');
 
-        if (categoriasCard) {
-            categoriasCard.addEventListener('click', (e) => {
+        if (ventasCard) {
+            ventasCard.addEventListener('click', (e) => {
                 if (!e.target.closest('button')) {
                     this.openCategoriasCollection();
                 }
             });
         }
 
-        if (analyzeCategoriasBtn) {
-            analyzeCategoriasBtn.addEventListener('click', (e) => {
+        if (analyzeVentasBtn) {
+            analyzeVentasBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.openCategoriasCollection();
             });
+            console.log('✅ Event listener de ventas agregado');
+        } else {
+            console.log('⚠️ Botón analyzeventasBtn no encontrado');
         }
+
+        if (exportVentasBtn) {
+            exportVentasBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showInfo('Abrir modal para exportar desde ahí');
+            });
+        }
+
+
+
+
+    // Tarjeta de Reservas
+    const reservasCard = document.getElementById('reservasCard');
+    const manageReservasBtn = document.getElementById('managereservasBtn');
+    const addReservaBtn = document.getElementById('addReserva');
+
+    if (reservasCard) {
+        reservasCard.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                this.openReservasCollection();
+            }
+        });
+    }
+
+    if (manageReservasBtn) {
+        manageReservasBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.openReservasCollection();
+        });
+        console.log('✅ Event listener de reservas agregado');
+    } else {
+        console.log('⚠️ Botón managereservasBtn no encontrado');
+    }
+
+    if (addReservaBtn) {
+        addReservaBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showInfo('Función de agregar reserva en desarrollo');
+        });
+    }
 
         // Otras tarjetas
         this.setupOtherCardListeners();
@@ -514,23 +559,23 @@ class DataManager {
     }
 
     openCategoriasCollection() {
-        if (!appState.currentUser) {
-            showError('Debe iniciar sesión para acceder a los datos');
-            if (window.authService) {
-                window.authService.showLoginModal();
-            }
-            return;
+        if (window.salesManager) {
+            window.salesManager.openVentasModal();
+        } else {
+            showError('Módulo de ventas no disponible');
         }
-
-        if (window.uiManager) {
-            window.uiManager.showModal(CONSTANTS.MODALS.CATEGORIAS);
-        }
-        
-        // Cargar datos después de mostrar el modal
-        setTimeout(() => {
-            this.loadCategoriasForModal();
-        }, 500);
     }
+
+
+    openReservasCollection() {
+
+        if (window.reservasManager) {
+            window.reservasManager.openReservasModal();
+        } else {
+            showError('Módulo de reservas no disponible');
+        }
+    }
+
 
     // ===========================
     // MÉTODOS PÚBLICOS
@@ -546,6 +591,10 @@ class DataManager {
     getCurrentCategoriasData() {
         return appState.filteredCategoriasData;
     }
+
+
+
+    
 }
 
 // Crear instancia global
@@ -568,6 +617,10 @@ export const openCategoriasCollection = () => {
 
 export const refreshData = () => {
     return dataManager.refreshData();
+};
+
+export const openReservasCollection = () => {
+    return dataManager.openReservasCollection();
 };
 
 // Hacer disponible globalmente

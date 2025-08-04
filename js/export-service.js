@@ -60,6 +60,21 @@ class ExportService {
         if (pdfCategoriasBtn) {
             pdfCategoriasBtn.addEventListener('click', () => this.exportCategoriasToPDF());
         }
+
+
+        // Botones de exportación para ventas
+        const excelVentasBtn = document.getElementById('excelVentasBtn');
+        const pdfVentasBtn = document.getElementById('pdfVentasBtn');
+
+        if (excelVentasBtn) {
+            excelVentasBtn.addEventListener('click', () => this.exportVentasToExcel());
+        }
+
+        if (pdfVentasBtn) {
+            pdfVentasBtn.addEventListener('click', () => this.exportVentasToExcel()); // Temporal
+        }
+
+
     }
 
     // ===========================
@@ -70,6 +85,125 @@ class ExportService {
             if (!this.validateExcelExport()) return;
 
             const data = appState.filteredZarpesData;
+            if (!this.validateData(data, 'Excel')) return;
+
+            showInfo('Generando archivo Excel...');
+
+            const excelData = this.prepareZarpesDataForExcel(data);
+            const filename = this.generateFilename('embarcaciones-guatape', 'xlsx');
+            
+            this.createExcelFile(excelData, filename, 'Registros Embarcaciones');
+            
+            showSuccess('¡Archivo Excel descargado exitosamente!');
+            
+        } catch (error) {
+            console.error('❌ Error exportando a Excel:', error);
+            showError('Error al generar archivo Excel: ' + error.message);
+        }
+    }
+
+    prepareZarpesDataForExcel(data) {
+        return data.map((registro, index) => {
+            const fechaFormateada = utils.formatDate(registro.fechaHora);
+
+            return {
+                'ID Embarcación': registro.embarcacionId || registro.id || index + 1,
+                'Embarcación': registro.embarcacion || 'N/A',
+                'Administrador': registro.administrador || 'N/A',
+                'Categoría': registro.categoria || 'N/A',
+                'Fecha y Hora': fechaFormateada,
+                'Cantidad Pasajeros': registro.cantidadPasajeros || 0,
+                'Valor por Persona': registro.valorPorPersona || 0,
+                'Valor Total': registro.valorTotal || 0,
+                'Posición Desembarque': registro.posicionDesembarque || 'N/A'
+            };
+        });
+    }
+
+    // ===========================
+    // EXPORTACIÓN A PDF - ZARPES
+    // ===========================
+    exportZarpesToPDF() {
+        try {
+            if (!this.validatePDFExport()) return;
+
+            const data = appState.filteredZarpesData;
+            if (!this.validateData(data, 'PDF')) return;
+
+            showInfo('Generando archivo PDF...');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+
+            // Encabezado del documento
+            this.addPDFHeader(doc, 'Registros de Embarcaciones - Embalse de Guatapé', data.length);
+
+            // Preparar datos para la tabla
+            const tableData = this.prepareZarpesDataForPDF(data);
+
+            // Crear tabla
+            doc.autoTable({
+                startY: 50,
+                head: [exportConfig.pdf.headers],
+                body: tableData,
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    halign: 'center'
+                },
+                headStyles: {
+                    fillColor: [6, 182, 212],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                columnStyles: exportConfig.pdf.columnStyles,
+                margin: { left: 15, right: 15 }
+            });
+
+            // Pie de página
+            this.addPDFFooter(doc);
+
+            // Descargar archivo
+            const filename = this.generateFilename('embarcaciones-guatape', 'pdf');
+            doc.save(filename);
+
+            showSuccess('¡Archivo PDF descargado exitosamente!');
+
+        } catch (error) {
+            console.error('❌ Error exportando a PDF:', error);
+            showError('Error al generar archivo PDF: ' + error.message);
+        }
+    }
+
+    prepareZarpesDataForPDF(data) {
+        return data.slice(0, 100).map((registro, index) => {
+            const fechaFormateada = utils.formatDate(registro.fechaHora);
+
+            return [
+                registro.embarcacionId || registro.id || index + 1,
+                registro.embarcacion || 'N/A',
+                registro.administrador || 'N/A',
+                registro.categoria || 'N/A',
+                fechaFormateada,
+                registro.cantidadPasajeros || 0,
+                `$${(registro.valorPorPersona || 0).toLocaleString('es-CO')}`,
+                `$${(registro.valorTotal || 0).toLocaleString('es-CO')}`
+            ];
+        });
+    }
+
+    // ===========================
+    // EXPORTACIÓN A EXCEL - CATEGORÍAS
+    // ===========================
+    exportCategoriasToExcel() {
+        try {
+            if (!this.validateExcelExport()) return;
+
+            const data = appState.filteredCategoriasData;
             if (!this.validateData(data, 'Excel')) return;
 
             showInfo('Generando archivo Excel de categorías...');
@@ -177,6 +311,49 @@ class ExportService {
         }
     }
 
+
+    // ===========================
+    // EXPORTACIÓN DE VENTAS
+    // ===========================
+    exportVentasToExcel() {
+        try {
+            if (!this.validateExcelExport()) return;
+            
+            const data = window.salesManager ? 
+                window.salesManager.getFilteredData() : 
+                appState.filteredVentasData || [];
+                
+            if (!this.validateData(data, 'Excel')) return;
+
+            showInfo('Generando archivo Excel de ventas...');
+            const excelData = this.prepareVentasDataForExcel(data);
+            const filename = this.generateFilename('ventas-embarcaciones-guatape', 'xlsx');
+            this.createExcelFile(excelData, filename, 'Registro de Ventas');
+            showSuccess('¡Archivo Excel de ventas descargado!');
+            
+        } catch (error) {
+            console.error('Error exportando ventas a Excel:', error);
+            showError('Error exportando ventas: ' + error.message);
+        }
+    }
+
+    prepareVentasDataForExcel(data) {
+        return data.map((venta, index) => ({
+            'No.': index + 1,
+            'Nombre': venta.nombre || 'N/A',
+            'Documento': venta.documento || 'N/A',
+            'Embarcación': venta.embarcacion || 'N/A',
+            'Fecha': venta.fecha || 'N/A',
+            'Adultos': venta.adultos || 0,
+            'Niños': venta.ninos || 0,
+            'Total Pasajeros': (venta.adultos || 0) + (venta.ninos || 0),
+            'Precio': venta.precio || 0,
+            'Email': venta.email || 'N/A',
+            'Teléfono': venta.telefono || 'N/A'
+        }));
+    }
+
+
     prepareCategoriasDataForPDF(data) {
         return data.slice(0, 100).map((registro, index) => {
             const fechaFormateada = utils.formatDate(registro.fechaHora);
@@ -188,8 +365,8 @@ class ExportService {
                 registro.administrador || 'N/A',
                 fechaFormateada,
                 registro.cantidadPasajeros || 0,
-                `${(registro.valorPorPersona || 0).toLocaleString('es-CO')}`,
-                `${(registro.valorTotal || 0).toLocaleString('es-CO')}`,
+                `$${(registro.valorPorPersona || 0).toLocaleString('es-CO')}`,
+                `$${(registro.valorTotal || 0).toLocaleString('es-CO')}`,
                 registro.posicionDesembarque || 'N/A'
             ];
         });
@@ -336,13 +513,6 @@ class ExportService {
                 
                 this.createExcelFile(processedData, filename + '.xlsx', sheetName);
                 showSuccess('Archivo Excel personalizado descargado');
-                
-            } else if (format === 'pdf') {
-                if (!this.validatePDFExport()) return;
-                
-                // Implementar exportación PDF personalizada si es necesario
-                showInfo('Exportación PDF personalizada en desarrollo');
-                
             } else {
                 showError('Formato de exportación no soportado');
             }
@@ -395,7 +565,6 @@ class ExportService {
                 this.createExcelFile(excelData, filename + '.xlsx', 'Datos por Fechas');
                 showSuccess(`Exportados ${filteredData.length} registros por rango de fechas`);
             } else if (format === 'pdf') {
-                // Implementar exportación PDF por fechas
                 showInfo('Exportación PDF por fechas en desarrollo');
             }
             
@@ -421,6 +590,44 @@ class ExportService {
         if (this.xlsxAvailable) formats.push('excel');
         if (this.jsPDFAvailable) formats.push('pdf');
         return formats;
+    }
+
+    getExportStatistics() {
+        const stats = {
+            totalExports: 0,
+            excelExports: 0,
+            pdfExports: 0,
+            lastExport: null
+        };
+        
+        try {
+            const saved = localStorage.getItem('export_statistics');
+            if (saved) {
+                Object.assign(stats, JSON.parse(saved));
+            }
+        } catch (error) {
+            console.warn('No se pudieron cargar estadísticas de exportación');
+        }
+        
+        return stats;
+    }
+
+    updateExportStatistics(format) {
+        try {
+            const stats = this.getExportStatistics();
+            stats.totalExports++;
+            stats.lastExport = new Date().toISOString();
+            
+            if (format === 'excel') {
+                stats.excelExports++;
+            } else if (format === 'pdf') {
+                stats.pdfExports++;
+            }
+            
+            localStorage.setItem('export_statistics', JSON.stringify(stats));
+        } catch (error) {
+            console.warn('No se pudieron actualizar estadísticas de exportación');
+        }
     }
 }
 
@@ -454,124 +661,13 @@ export const exportByDateRange = (startDate, endDate, format) => {
     return exportService.exportByDateRange(startDate, endDate, format);
 };
 
+export const exportVentasToExcel = () => {
+    return exportService.exportVentasToExcel();
+};
+
+export const exportVentasToPDF = () => {
+    return exportService.exportVentasToExcel(); // Temporal
+};
+
 // Hacer disponible globalmente
-window.exportService = exportService;'Excel')) return;
-
-            showInfo('Generando archivo Excel...');
-
-            const excelData = this.prepareZarpesDataForExcel(data);
-            const filename = this.generateFilename('embarcaciones-guatape', 'xlsx');
-            
-            this.createExcelFile(excelData, filename, 'Registros Embarcaciones');
-            
-            showSuccess('¡Archivo Excel descargado exitosamente!');
-            
-        } catch (error) {
-            console.error('❌ Error exportando a Excel:', error);
-            showError('Error al generar archivo Excel: ' + error.message);
-        }
-    }
-
-    prepareZarpesDataForExcel(data) {
-        return data.map((registro, index) => {
-            const fechaFormateada = utils.formatDate(registro.fechaHora);
-
-            return {
-                'ID Embarcación': registro.embarcacionId || registro.id || index + 1,
-                'Embarcación': registro.embarcacion || 'N/A',
-                'Administrador': registro.administrador || 'N/A',
-                'Categoría': registro.categoria || 'N/A',
-                'Fecha y Hora': fechaFormateada,
-                'Cantidad Pasajeros': registro.cantidadPasajeros || 0,
-                'Valor por Persona': registro.valorPorPersona || 0,
-                'Valor Total': registro.valorTotal || 0,
-                'Posición Desembarque': registro.posicionDesembarque || 'N/A'
-            };
-        });
-    }
-
-    // ===========================
-    // EXPORTACIÓN A PDF - ZARPES
-    // ===========================
-    exportZarpesToPDF() {
-        try {
-            if (!this.validatePDFExport()) return;
-
-            const data = appState.filteredZarpesData;
-            if (!this.validateData(data, 'PDF')) return;
-
-            showInfo('Generando archivo PDF...');
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
-
-            // Encabezado del documento
-            this.addPDFHeader(doc, 'Registros de Embarcaciones - Embalse de Guatapé', data.length);
-
-            // Preparar datos para la tabla
-            const tableData = this.prepareZarpesDataForPDF(data);
-
-            // Crear tabla
-            doc.autoTable({
-                startY: 50,
-                head: [exportConfig.pdf.headers],
-                body: tableData,
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
-                    halign: 'center'
-                },
-                headStyles: {
-                    fillColor: [6, 182, 212],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: 9
-                },
-                alternateRowStyles: {
-                    fillColor: [248, 250, 252]
-                },
-                columnStyles: exportConfig.pdf.columnStyles,
-                margin: { left: 15, right: 15 }
-            });
-
-            // Pie de página
-            this.addPDFFooter(doc);
-
-            // Descargar archivo
-            const filename = this.generateFilename('embarcaciones-guatape', 'pdf');
-            doc.save(filename);
-
-            showSuccess('¡Archivo PDF descargado exitosamente!');
-
-        } catch (error) {
-            console.error('❌ Error exportando a PDF:', error);
-            showError('Error al generar archivo PDF: ' + error.message);
-        }
-    }
-
-    prepareZarpesDataForPDF(data) {
-        return data.slice(0, 100).map((registro, index) => {
-            const fechaFormateada = utils.formatDate(registro.fechaHora);
-
-            return [
-                registro.embarcacionId || registro.id || index + 1,
-                registro.embarcacion || 'N/A',
-                registro.administrador || 'N/A',
-                registro.categoria || 'N/A',
-                fechaFormateada,
-                registro.cantidadPasajeros || 0,
-                `$${(registro.valorPorPersona || 0).toLocaleString('es-CO')}`,
-                `$${(registro.valorTotal || 0).toLocaleString('es-CO')}`
-            ];
-        });
-    }
-
-    // ===========================
-    // EXPORTACIÓN A EXCEL - CATEGORÍAS
-    // ===========================
-    exportCategoriasToExcel() {
-        try {
-            if (!this.validateExcelExport()) return;
-
-            const data = appState.filteredCategoriasData;
-            if (!this.validateData(data,
+window.exportService = exportService;

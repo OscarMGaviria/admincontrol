@@ -168,7 +168,7 @@
             <div class="zarpes-header">
                 <h2 class="zarpes-title">
                     <i class="fas fa-database"></i>
-                    Registros de Embarcaciones
+                    Registros de Zarpes
                 </h2>
                 <div class="zarpes-actions">
                     <button class="export-btn excel" id="excelBtn">
@@ -217,7 +217,6 @@
                                 <th>Pasajeros</th>
                                 <th>Valor/Persona</th>
                                 <th>Valor Total</th>
-                                <th>Pos. Desembarque</th>
                             </tr>
                         </thead>
                         <tbody id="zarpesTableBody">
@@ -302,6 +301,234 @@
         </div>
     </div>
 
+
+    <!-- MODAL DE VENTAS -->
+    <div id="ventasOverlay" class="zarpes-overlay">
+        <div class="zarpes-modal">
+            <div class="zarpes-header">
+                <h2 class="zarpes-title">
+                    <i class="fas fa-cash-register"></i>
+                    Análisis de Ventas
+                </h2>
+                <div class="zarpes-actions">
+                    <button class="export-btn excel" id="excelVentasBtn">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="export-btn pdf" id="pdfVentasBtn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="modal-close" onclick="window.salesManager.closeVentasModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="zarpes-content">
+                <!-- Estadísticas de ventas -->
+                <div class="sales-stats-container">
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalVentasCount">0</div>
+                            <div class="stat-label">Total Ventas</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalPasajerosVentas">0</div>
+                            <div class="stat-label">Total Pasajeros</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalIngresosVentas">$0</div>
+                            <div class="stat-label">Ingresos Totales</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="promedioVentasPrecio">$0</div>
+                            <div class="stat-label">Precio Promedio</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ventasLoading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando datos de ventas...</p>
+                </div>
+
+                <div id="ventasError" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Error al cargar los datos de ventas.</span>
+                </div>
+
+                <div id="ventasTableContainer" class="table-container" style="display: none;">
+                    <table class="zarpes-table" id="ventasTable">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Embarcación</th>
+                                <th>Fecha</th>
+                                <th>Adultos</th>
+                                <th>Niños</th>
+                                <th>Total Pax</th>
+                                <th>Precio</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ventasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noVentasData" class="no-data" style="display: none;">
+                    <div class="no-data-icon">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    <h3>No hay datos de ventas</h3>
+                    <p>No se encontraron registros de ventas en la base de datos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL DE RESERVAS -->
+    <div id="reservasOverlay" class="zarpes-overlay">
+        <div class="zarpes-modal">
+            <div class="zarpes-header">
+                <h2 class="zarpes-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Gestión de Reservas
+                </h2>
+                <div class="zarpes-actions">
+                    <button class="export-btn excel" id="excelReservasBtn">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="export-btn pdf" id="pdfReservasBtn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="modal-close" onclick="window.reservasManager.closeReservasModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="zarpes-content">
+                <!-- Estadísticas de reservas -->
+                <div class="sales-stats-container">
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalReservasCount">0</div>
+                            <div class="stat-label">Total Reservas</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalPasajerosReservas">0</div>
+                            <div class="stat-label">Total Pasajeros</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="reservasPendientes">0</div>
+                            <div class="stat-label">Pendientes</div>
+                        </div>
+                    </div>
+                    <div class="sales-stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="reservasUsadas">0</div>
+                            <div class="stat-label">Usadas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de carga masiva -->
+                <div id="reservasUploadSection" class="upload-section" style="display: none;">
+                    <h3><i class="fas fa-upload"></i> Carga Masiva de Reservas</h3>
+                    <div class="upload-container">
+                        <div class="upload-area">
+                            <input type="file" id="excelFileInput" accept=".xlsx,.xls" class="file-input">
+                            <label for="excelFileInput" class="file-label">
+                                <i class="fas fa-file-excel"></i>
+                                <span>Seleccionar archivo Excel</span>
+                            </label>
+                            <button id="uploadExcelBtn" class="upload-btn" disabled>
+                                <i class="fas fa-cloud-upload-alt"></i> Cargar Datos
+                            </button>
+                        </div>
+                        <div id="excelPreview" class="excel-preview" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div id="reservasLoading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando datos de reservas...</p>
+                </div>
+
+                <div id="reservasError" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Error al cargar los datos de reservas.</span>
+                </div>
+
+                <div id="reservasTableContainer" class="table-container" style="display: none;">
+                    <table class="zarpes-table" id="reservasTable">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Empresa</th>
+                                <th>Categoría</th>
+                                <th>Pasajeros</th>
+                                <th>Fecha Reserva</th>
+                                <th>Fecha Salida</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noReservasData" class="no-data" style="display: none;">
+                    <div class="no-data-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h3>No hay reservas disponibles</h3>
+                    <p>No se encontraron registros de reservas en la base de datos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- DASHBOARD ADMINISTRATIVO (OCULTO INICIALMENTE) -->
     <div id="adminDashboard" class="admin-dashboard">
         <!-- HEADER DEL DASHBOARD -->
@@ -368,57 +595,55 @@
                         <button class="card-btn primary" id="viewZarpesBtn">
                             <i class="fas fa-eye"></i> Ver
                         </button>
-                        <button class="card-btn" id="newZarpeBtn">
-                            <i class="fas fa-plus"></i> Nuevo
-                        </button>
+
                     </div>
                 </div>
 
                 <!-- ANÁLISIS POR CATEGORÍA -->
-                <div class="collection-card reservas" id="categoriasCard">
+                <div class="collection-card reservas" id="ventasCard">
                     <div class="card-header">
                         <div class="card-icon">
                             <i class="fas fa-tags"></i>
                         </div>
                         <div class="card-count">
-                            <div class="count-number" id="countCategorias">0</div>
+                            <div class="count-number" id="countventas">0</div>
                             <div class="count-label">Categorías</div>
                         </div>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title">Análisis por Categoría</h3>
-                        <p class="card-description">Revisa estadísticas y reportes segmentados por categoría de embarcación: carguero, pasajeros, turismo.</p>
+                        <h3 class="card-title">Análisis de ventas</h3>
+                        <p class="card-description">Revisa estadísticas y reportes de ventas por embarcación: carguero, pasajeros, turismo.</p>
                     </div>
                     <div class="card-actions">
-                        <button class="card-btn primary" id="analyzeCategoriasBtn">
-                            <i class="fas fa-chart-pie"></i> Analizar
+                        <button class="card-btn primary" id="analyzeventasBtn">
+                            <i class="fas fa-chart-pie"></i> ver reporte
                         </button>
-                        <button class="card-btn" id="exportCategoriasBtn">
+                        <button class="card-btn" id="exportventasBtn">
                             <i class="fas fa-download"></i> Exportar
                         </button>
                     </div>
                 </div>
 
                 <!-- GESTIÓN DE EMBARCACIONES -->
-                <div class="collection-card embarcaciones" id="embarcacionesCard">
+                <div class="collection-card embarcaciones" id="reservasCard">
                     <div class="card-header">
                         <div class="card-icon">
                             <i class="fas fa-ship"></i>
                         </div>
                         <div class="card-count">
-                            <div class="count-number" id="countEmbarcaciones">0</div>
-                            <div class="count-label">Embarcaciones</div>
+                            <div class="count-number" id="countreservas">0</div>
+                            <div class="count-label">Reservas</div>
                         </div>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title">Gestión de Embarcaciones</h3>
-                        <p class="card-description">Administra la flota completa, posiciones, estados y información detallada de cada embarcación.</p>
+                        <h3 class="card-title">Gestión de reservas</h3>
+                        <p class="card-description">Administra las reservas realizadas.</p>
                     </div>
                     <div class="card-actions">
-                        <button class="card-btn primary" id="manageEmbarcacionesBtn">
+                        <button class="card-btn primary" id="managereservasBtn">
                             <i class="fas fa-list"></i> Gestionar
                         </button>
-                        <button class="card-btn" id="addEmbarcacionBtn">
+                        <button class="card-btn" id="addReserva">
                             <i class="fas fa-plus"></i> Agregar
                         </button>
                     </div>
@@ -453,6 +678,8 @@
     </div>
 
     <!-- Scripts Modulares -->
+    <script src="js/sales-manager.js"></script>
+    <script src="js/reservas-manager.js"></script>
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/notifications.js"></script>
     <script type="module" src="js/firebase-service.js"></script>

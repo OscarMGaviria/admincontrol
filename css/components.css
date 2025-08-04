@@ -161,7 +161,7 @@
     border: 1px solid rgba(148, 163, 184, 0.15);
     width: 95%;
     max-width: 1200px;
-    max-height: 90vh;
+    height: 90vh; /* Altura fija */
     backdrop-filter: blur(20px);
     animation: slideInUp 0.5s ease;
     overflow: hidden;
@@ -438,6 +438,90 @@
     border-left: 4px solid #f59e0b;
 }
 
+
+
+/* ===========================
+   MÓDULO DE VENTAS
+=========================== */
+.sales-stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.sales-stat-card {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    transition: all 0.3s ease;
+}
+
+.sales-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: #06b6d4;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #f8fafc;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+/* Colores específicos para estadísticas */
+.sales-stat-card:nth-child(1) .stat-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.sales-stat-card:nth-child(2) .stat-icon {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.sales-stat-card:nth-child(3) .stat-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.sales-stat-card:nth-child(4) .stat-icon {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
@@ -447,4 +531,405 @@
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+
+
+/* ===========================
+   SCROLLBARS INVISIBLES PARA TABLAS
+=========================== */
+
+/* Contenedores de tablas con scrollbar invisible */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    
+    /* Scrollbar invisible para WebKit (Chrome, Safari, Edge) */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer y Edge */
+}
+
+/* Ocultar scrollbar en WebKit */
+.table-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Alternativa más específica para diferentes navegadores */
+.table-container::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+.table-container::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ===========================
+   EFECTOS VISUALES PARA INDICAR SCROLL
+=========================== */
+
+/* Sombras internas para indicar que hay más contenido */
+.table-container {
+    position: relative;
+}
+
+/* Sombra superior cuando hay scroll hacia abajo */
+.table-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(
+        to bottom,
+        rgba(30, 41, 59, 0.1) 0%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Sombra inferior cuando hay scroll hacia arriba */
+.table-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(
+        to top,
+        rgba(30, 41, 59, 0.1) 0%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Mostrar sombras cuando se puede hacer scroll */
+.table-container.has-scroll-top::before {
+    opacity: 1;
+}
+
+.table-container.has-scroll-bottom::after {
+    opacity: 1;
+}
+
+/* ===========================
+   ESTILOS MEJORADOS PARA TABLAS
+=========================== */
+
+.zarpes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    /* Asegurar que la tabla sea más fluida en el scroll */
+    table-layout: auto;
+}
+
+.zarpes-table th {
+    background: rgba(30, 41, 59, 0.8);
+    color: #f8fafc;
+    font-weight: 600;
+    padding: 16px 12px;
+    text-align: left;
+    border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    /* Evitar que el header se vea cortado */
+    backdrop-filter: blur(10px);
+}
+
+.zarpes-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    color: #cbd5e1;
+    transition: background-color 0.2s ease;
+    /* Mejorar el renderizado del texto */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Hover mejorado */
+.zarpes-table tbody tr:hover {
+    background: rgba(6, 182, 212, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   INDICADORES DE SCROLL SUAVES
+=========================== */
+
+/* Gradiente sutil en los bordes para indicar scroll disponible */
+.table-container {
+    background: 
+        /* Gradiente superior */
+        linear-gradient(rgba(30, 41, 59, 0.8) 30%, transparent),
+        /* Gradiente inferior */  
+        linear-gradient(transparent, rgba(30, 41, 59, 0.8) 70%),
+        /* Gradiente izquierdo */
+        linear-gradient(90deg, rgba(30, 41, 59, 0.8) 30%, transparent),
+        /* Gradiente derecho */
+        linear-gradient(270deg, rgba(30, 41, 59, 0.8) 30%, transparent),
+        /* Fondo base */
+        rgba(51, 65, 85, 0.5);
+    
+    background-repeat: no-repeat;
+    background-size: 
+        100% 40px,  /* Superior */
+        100% 40px,  /* Inferior */
+        40px 100%,  /* Izquierda */
+        40px 100%;  /* Derecha */
+    
+    background-position:
+        0 0,        /* Superior */
+        0 100%,     /* Inferior */
+        0 0,        /* Izquierda */
+        100% 0;     /* Derecha */
+}
+
+/* ===========================
+   RESPONSIVE - SCROLL INVISIBLE EN MÓVILES
+=========================== */
+
+@media (max-width: 768px) {
+    .table-container {
+        /* En móviles, asegurar que el scroll sea completamente invisible */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    }
+    
+    .zarpes-table td {
+        /* En móviles, permitir wrap del texto */
+        white-space: normal;
+        min-width: 80px;
+        max-width: 120px;
+    }
+}
+
+/* ===========================
+   SCROLLBAR PERSONALIZADO OPCIONAL
+   (Descomenta si prefieres scrollbar muy sutil)
+=========================== */
+
+
+.table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.3);
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.5);
+}
+
+.table-container::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+
+/* ===========================
+   ESTILOS PARA MODAL DE RESERVAS
+=========================== */
+
+/* ===========================
+   SECCIÓN DE CARGA MASIVA
+=========================== */
+.upload-section {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.upload-section h3 {
+    color: #f8fafc;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+}
+
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.upload-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    background: rgba(51, 65, 85, 0.8);
+    border: 2px dashed rgba(148, 163, 184, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.file-label:hover {
+    border-color: #06b6d4;
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.upload-btn:disabled {
+    background: rgba(71, 85, 105, 0.6);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.excel-preview {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.excel-preview h4 {
+    color: #f8fafc;
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.preview-table th,
+.preview-table td {
+    padding: 8px 6px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    text-align: left;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preview-table th {
+    background: rgba(6, 182, 212, 0.3);
+    color: #06b6d4;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.preview-table td {
+    color: #cbd5e1;
+}
+
+.preview-table tr:nth-child(even) td {
+    background: rgba(51, 65, 85, 0.3);
+}
+
+/* Estados de reservas */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-badge.usado {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.pendiente {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+
+.upload-progress {
+    background: rgba(6, 182, 212, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    border-left: 4px solid #06b6d4;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    transition: width 0.3s ease;
 }
