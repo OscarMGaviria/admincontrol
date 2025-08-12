@@ -261,25 +261,52 @@ class CarouselManager {
     }
 
     resolveAssetPath(src) {
-    // Acepta http(s) y data: tal cual
-    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+        if (!src) return src;
 
-    // Limpia slashes iniciales ("/img/a.jpg" -> "img/a.jpg")
-    const clean = src.replace(/^\/+/, '');
+        // 1) URLs absolutas o data URIs: devolver tal cual
+        if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
 
-    // Base URL:
-    // 1) Si hay <base href> en el HTML, úsalo
-    // 2) Si no, usa la carpeta actual del documento (funciona en Pages con subcarpeta /usuario/rep/)
-    const base = document.querySelector('base')?.href
-        || `${location.origin}${location.pathname.replace(/\/[^/]*$/, '/')}`;
+        // 2) Si hay <base href> en el HTML, úsalo como base
+        const baseTagHref = document.querySelector('base')?.href;
 
-    try {
-        return new URL(clean, base).href;
-    } catch {
-        // Fallback relativo
-        return clean;
+        // 3) Permitir override manual (opcional) vía meta o variable global
+        //    <meta name="basepath" content="/mi-repo/">
+        const metaBase = document.querySelector('meta[name="basepath"]')?.content;
+        const globalBase = window.__APP_BASE__ || '';
+
+        // 4) Detectar si estamos en GitHub Pages
+        const isGitHubPages = /github\.io$/i.test(location.hostname);
+
+        // 5) Detectar si es "project page" (https://usuario.github.io/mi-repo/...)
+        //    En ese caso el primer segmento de pathname es el repo.
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        const repoSegment = pathSegments.length > 0 ? `/${pathSegments[0]}/` : '/';
+        const projectBase = isGitHubPages ? repoSegment : '/';
+
+        // 6) Construir base definitiva en orden de prioridad
+        //    (a) <base href>  (b) meta/global overrides  (c) GitHub Pages projectBase  (d) carpeta actual del documento
+        const fallbackDir = `${location.origin}${location.pathname.replace(/\/[^/]*$/, '/')}`;
+        const computedBase =
+            baseTagHref ||
+            (metaBase ? new URL(metaBase, location.origin).href : null) ||
+            (globalBase ? new URL(globalBase, location.origin).href : null) ||
+            (new URL(projectBase, location.origin).href) ||
+            fallbackDir;
+
+        // 7) Si la ruta del asset empieza con "/", trátala como "raíz del sitio"
+        //    Para project pages, la "raíz" real incluye el repo (p.ej. /mi-repo/)
+        if (src.startsWith('/')) {
+            const clean = src.replace(/^\/+/, '');                 // "/assets/a.jpg" -> "assets/a.jpg"
+            const siteRoot = isGitHubPages
+            ? new URL(repoSegment, location.origin).href        // .../mi-repo/
+            : `${location.origin}/`;                            // .../
+            return new URL(clean, siteRoot).href;
+        }
+
+        // 8) Rutas relativas (sin "/"): resolver contra la base calculada
+        return new URL(src, computedBase).href;
     }
-    }
+
 
 
 
@@ -300,15 +327,18 @@ class CarouselManager {
         const availableImages = [];
         
         for (const imageSrc of this.images) {
+            console.log("🔍 Verificando imagen:", imageSrc); // nombre/ruta original
+            
             try {
+                const resolvedSrc = this.resolveAssetPath(imageSrc);
+                console.log("📂 Ruta resuelta:", resolvedSrc); // ruta absoluta después de procesar
                 await this.loadImage(imageSrc);
                 availableImages.push(imageSrc);
             } catch (error) {
-                console.warn(`Imagen no disponible: ${imageSrc}`);
+                console.warn(`⚠️ Imagen no disponible: ${imageSrc}`);
             }
         }
         
-        // Si no hay imágenes disponibles, crear imágenes de placeholder
         if (availableImages.length === 0) {
             console.warn('Ninguna imagen del carrusel está disponible, usando placeholders');
             this.images = this.createPlaceholderImages();
@@ -316,8 +346,9 @@ class CarouselManager {
             this.images = availableImages;
         }
         
-        console.log(`Imágenes disponibles para carrusel: ${this.images.length}`);
+        console.log(`✅ Imágenes disponibles para carrusel: ${this.images.length}`);
     }
+
 
     createPlaceholderImages() {
         const colors = [
