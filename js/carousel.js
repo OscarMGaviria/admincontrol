@@ -18,14 +18,14 @@ class CarouselManager {
         this.init();
     }
 
-    init() {
-        // Verificar disponibilidad de imágenes
-        this.checkImageAvailability();
-        
-        // Inicializar carrusel principal si existe
-        if (document.getElementById('carousel')) {
-            this.initializeCarousel('carousel');
-        }
+    async init() {
+    // Verificar disponibilidad de imágenes y esperar a que termine
+    await this.checkImageAvailability();
+
+    // Inicializar carrusel principal si existe
+    if (document.getElementById('carousel')) {
+        this.initializeCarousel('carousel');
+    }
     }
 
     // ===========================
@@ -82,7 +82,8 @@ class CarouselManager {
         slide.setAttribute('data-carousel', containerId);
         
         // Verificar si la imagen existe antes de asignarla
-        this.loadImage(imageSrc).then(loadedSrc => {
+        const resolvedSrc = this.resolveAssetPath(imageSrc);
+            this.loadImage(resolvedSrc).then(loadedSrc => {
             slide.style.backgroundImage = `url(${loadedSrc})`;
         }).catch(() => {
             // Si no se puede cargar la imagen, agregar un fondo de respaldo
@@ -259,15 +260,39 @@ class CarouselManager {
         }
     }
 
+    resolveAssetPath(src) {
+    // Acepta http(s) y data: tal cual
+    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+
+    // Limpia slashes iniciales ("/img/a.jpg" -> "img/a.jpg")
+    const clean = src.replace(/^\/+/, '');
+
+    // Base URL:
+    // 1) Si hay <base href> en el HTML, úsalo
+    // 2) Si no, usa la carpeta actual del documento (funciona en Pages con subcarpeta /usuario/rep/)
+    const base = document.querySelector('base')?.href
+        || `${location.origin}${location.pathname.replace(/\/[^/]*$/, '/')}`;
+
+    try {
+        return new URL(clean, base).href;
+    } catch {
+        // Fallback relativo
+        return clean;
+    }
+    }
+
+
+
     // ===========================
     // UTILIDADES DE IMAGEN
     // ===========================
     async loadImage(src) {
+        const finalSrc = this.resolveAssetPath(src);
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.onload = () => resolve(src);
-            img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${src}`));
-            img.src = src;
+            img.onload = () => resolve(finalSrc);
+            img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${finalSrc}`));
+            img.src = finalSrc;
         });
     }
 
