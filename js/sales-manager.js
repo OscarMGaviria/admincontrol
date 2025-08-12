@@ -3,10 +3,14 @@
 // ===========================
 
 class SalesManager {
-    constructor() {
-        this.currentData = [];
-        this.filteredData = [];
-        console.log('💰 SalesManager inicializado');
+constructor() {
+    this.currentData = [];
+    this.filteredData = [];
+    // AGREGAR ESTAS LÍNEAS
+    this.activeFilters = {
+            search: '',
+            date: ''
+        };
     }
 
     // ===========================
@@ -26,6 +30,7 @@ class SalesManager {
             // Cargar datos
             setTimeout(() => {
                 this.loadVentasData();
+                this.setupVentasFilters();
             }, 500);
         } else {
             console.error('❌ Modal ventasOverlay no encontrado');
@@ -44,20 +49,151 @@ class SalesManager {
     }
 
     // ===========================
+    // CONFIGURACIÓN DE FILTROS
+    // ===========================
+    setupVentasFilters() {
+        console.log('🔍 Configurando filtros de ventas...');
+        
+        const searchFilter = document.getElementById('searchVentasFilter');
+        const dateFilter = document.getElementById('dateVentasFilter');
+        const clearBtn = document.getElementById('clearVentasFilters');
+        
+        if (searchFilter) {
+            searchFilter.addEventListener('input', (e) => {
+                this.activeFilters.search = e.target.value;
+                this.applyVentasFilters();
+            });
+        }
+        
+        if (dateFilter) {
+            dateFilter.addEventListener('change', (e) => {
+                this.activeFilters.date = e.target.value;
+                this.applyVentasFilters();
+            });
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearVentasFilters();
+            });
+        }
+        
+        console.log('✅ Filtros de ventas configurados');
+
+
+        // Botón de refresh
+        const refreshBtn = document.getElementById('refreshVentasBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                console.log('🔄 Refrescando datos de ventas...');
+                if (window.dataManager) {
+                    window.dataManager.refreshCache('ventas');
+                }
+                if (window.showInfo) {
+                    window.showInfo('Recargando datos de ventas...');
+                }
+            });
+        }
+        
+        console.log('✅ Filtros de ventas configurados');
+    }
+
+    applyVentasFilters() {
+        console.log('🔍 Aplicando filtros:', this.activeFilters);
+        
+        this.filteredData = this.currentData.filter(venta => {
+            // Filtro de búsqueda
+            if (this.activeFilters.search) {
+                const searchTerm = this.activeFilters.search.toLowerCase();
+                const matchesSearch = 
+                    (venta.nombre && venta.nombre.toLowerCase().includes(searchTerm)) ||
+                    (venta.documento && venta.documento.toString().includes(searchTerm)) ||
+                    (venta.embarcacion && venta.embarcacion.toLowerCase().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Filtro de fecha
+            if (this.activeFilters.date) {
+                if (!venta.fecha) return false;
+                
+                // Convertir fecha del registro para comparar
+                let ventaFecha = '';
+                if (venta.fecha) {
+                    // Asumir formato DD/MM/AAAA o similar
+                    const fechaParts = venta.fecha.split('/');
+                    if (fechaParts.length === 3) {
+                        // Convertir DD/MM/AAAA a AAAA-MM-DD
+                        ventaFecha = `${fechaParts[2]}-${fechaParts[1].padStart(2, '0')}-${fechaParts[0].padStart(2, '0')}`;
+                    }
+                }
+                
+                if (ventaFecha !== this.activeFilters.date) return false;
+            }
+            
+            return true;
+        });
+        
+        this.populateVentasTable();
+        
+        console.log(`📊 Filtros aplicados: ${this.filteredData.length}/${this.currentData.length} registros`);
+    }
+
+    clearVentasFilters() {
+        console.log('🧹 Limpiando filtros de ventas...');
+        
+        this.activeFilters = {
+            search: '',
+            date: ''
+        };
+        
+        // Limpiar campos UI
+        const searchFilter = document.getElementById('searchVentasFilter');
+        const dateFilter = document.getElementById('dateVentasFilter');
+        
+        if (searchFilter) searchFilter.value = '';
+        if (dateFilter) dateFilter.value = '';
+        
+        // Restaurar datos completos
+        this.filteredData = [...this.currentData];
+        this.populateVentasTable();
+        
+        if (window.showSuccess) {
+            window.showSuccess('Filtros limpiados');
+        }
+    }
+
+
+    // ===========================
     // CARGA DE DATOS
     // ===========================
     async loadVentasData() {
-        console.log('📊 Iniciando carga de ventas...');
-        
+
         try {
+            // Verificar caché primero
+            if (window.dataManager && window.dataManager.isCacheValid('ventas')) {
+                console.log('📦 Usando datos en caché para ventas');
+                const cachedData = window.dataManager.dataCache.ventas.data;
+                
+                if (!cachedData || cachedData.length === 0) {
+                    this.showNoDataState();
+                    return;
+                }
+                
+                this.currentData = cachedData;
+                this.filteredData = [...cachedData];
+                this.displayVentasData();
+                return;
+            }
+            
+            // Cargar desde Firebase
+            console.log('🔄 Cargando ventas desde Firebase...');
             this.showLoadingState();
             
-            // Usar firebaseService directamente sin verificaciones de usuario
             if (!window.firebaseService) {
                 throw new Error('FirebaseService no disponible');
             }
 
-            console.log('🔥 Llamando a firebase para cargar ventas...');
             const data = await window.firebaseService.loadVentasData();
             
             if (!data || data.length === 0) {
@@ -66,11 +202,14 @@ class SalesManager {
                 return;
             }
             
+            // Guardar en caché
+            if (window.dataManager) {
+                window.dataManager.updateCache('ventas', data);
+            }
+            
             this.currentData = data;
             this.filteredData = [...data];
-            
             this.displayVentasData();
-            this.updateVentasStats();
             
             console.log(`✅ Cargadas ${data.length} ventas exitosamente`);
             
@@ -146,6 +285,12 @@ class SalesManager {
         if (noData) noData.style.display = 'none';
         if (table) table.style.display = 'block';
 
+
+        const lastUpdateElement = document.getElementById('ventasLastUpdate');
+        if (lastUpdateElement && window.dataManager) {
+            lastUpdateElement.textContent = window.dataManager.getLastUpdateText('ventas');
+        }
+
         this.populateVentasTable();
     }
 
@@ -191,38 +336,9 @@ class SalesManager {
         console.log(`✅ Tabla poblada con ${this.filteredData.length} registros`);
     }
 
-    // ===========================
-    // ESTADÍSTICAS SIMPLES
-    // ===========================
-    updateVentasStats() {
-        const stats = this.calculateStats(this.filteredData);
-        
-        // Actualizar elementos si existen
-        const totalVentasCount = document.getElementById('totalVentasCount');
-        const totalPasajerosVentas = document.getElementById('totalPasajerosVentas');
-        const totalIngresosVentas = document.getElementById('totalIngresosVentas');
-        const promedioVentasPrecio = document.getElementById('promedioVentasPrecio');
 
-        if (totalVentasCount) totalVentasCount.textContent = stats.totalVentas;
-        if (totalPasajerosVentas) totalPasajerosVentas.textContent = stats.totalPasajeros;
-        if (totalIngresosVentas) totalIngresosVentas.textContent = `$${Math.round(stats.totalIngresos/1000)}K`;
-        if (promedioVentasPrecio) promedioVentasPrecio.textContent = `$${Math.round(stats.precioPromedio/1000)}K`;
 
-        console.log('📊 Estadísticas actualizadas:', stats);
-    }
 
-    calculateStats(data) {
-        if (!data || data.length === 0) {
-            return { totalVentas: 0, totalPasajeros: 0, totalIngresos: 0, precioPromedio: 0 };
-        }
-
-        const totalVentas = data.length;
-        const totalPasajeros = data.reduce((sum, venta) => sum + (venta.adultos || 0) + (venta.ninos || 0), 0);
-        const totalIngresos = data.reduce((sum, venta) => sum + (venta.precio || 0), 0);
-        const precioPromedio = totalVentas > 0 ? totalIngresos / totalVentas : 0;
-
-        return { totalVentas, totalPasajeros, totalIngresos, precioPromedio };
-    }
 
     // ===========================
     // MÉTODOS PÚBLICOS
@@ -234,7 +350,25 @@ class SalesManager {
     getCurrentData() {
         return this.currentData;
     }
+
+    // ===========================
+    // MÉTODOS PARA FILTROS
+    // ===========================
+    getActiveFilters() {
+        return this.activeFilters;
+    }
+
+    hasActiveFilters() {
+        return this.activeFilters.search !== '' || this.activeFilters.date !== '';
+    }
+
+    setFilter(filterKey, value) {
+        this.activeFilters[filterKey] = value;
+        this.applyVentasFilters();
+    }
 }
+
+
 
 // Crear instancia global inmediatamente
 const salesManager = new SalesManager();

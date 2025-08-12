@@ -112,7 +112,9 @@
     .zarpes-actions {
         flex-direction: row;
         width: 100%;
-        justify-content: center;
+        justify-content: flex-start; 
+        flex-wrap: wrap; 
+        gap: 8px; 
     }
 
     /* Filtros */
@@ -274,8 +276,10 @@
     }
 
     .zarpes-actions {
-        flex-direction: column;
-        gap: 8px;
+        flex-direction: row; 
+        gap: 6px; 
+        flex-wrap: wrap; 
+        justify-content: flex-start;
     }
 
     .export-btn {
@@ -495,4 +499,128 @@
 @media (prefers-color-scheme: dark) {
     /* Los estilos ya están optimizados para modo oscuro */
     /* Aquí se pueden agregar ajustes adicionales si es necesario */
+}
+
+
+/* ====================================================================================================================================
+/* ====================================================================================================================================
+/* ====================================================================================================================================
+   BLOQUEO SCROLL EN MÓVILES
+=========================== */
+@media (max-width: 768px) {
+    body.modal-open {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+    
+    /* En iOS, prevenir el bounce scroll */
+    .modal-open .zarpes-overlay {
+        position: fixed;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+}
+
+/* Para dispositivos con notch (iPhone X+) */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body.modal-open {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+
+
+/* ======================================================================================================================
+/* ======================================================================================================================
+   MEJORAS PARA BOTONES DE MODAL
+=========================== */
+/* ===========================
+   MEJORAS PARA BOTONES DE MODAL
+=========================== */
+.zarpes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    gap: 16px;
+    flex-wrap: wrap; /* Permitir envolver en pantallas pequeñas */
+}
+
+.zarpes-actions {
+    display: flex;
+    gap: 8px; /* Reducir gap */
+    flex-wrap: nowrap; /* NO envolver los botones */
+    justify-content: flex-end;
+    align-items: center;
+    min-width: fit-content; /* Ajustar al contenido */
+    flex-shrink: 0; /* No permitir que se reduzca */
+}
+
+/* Asegurar que el botón de cerrar tenga espacio */
+.modal-close {
+    margin-left: 8px; /* Agregar margen izquierdo */
+    flex-shrink: 0;
+    min-width: 40px; /* Ancho mínimo */
+}
+
+/* Botón de refresh más compacto */
+.export-btn.refresh {
+    min-width: 40px;
+    padding: 10px 8px; /* Reducir padding horizontal */
+}
+
+/* Hacer botones de exportación más compactos en móviles */
+@media (max-width: 768px) {
+    .zarpes-actions {
+        gap: 6px; /* Gap aún más pequeño */
+    }
+    
+    .export-btn {
+        padding: 8px 10px; /* Reducir padding en móviles */
+        font-size: 0.8rem;
+    }
+    
+    .export-btn.refresh {
+        padding: 8px 6px;
+    }
+    
+    .modal-close {
+        margin-left: 6px;
+        padding: 8px;
+    }
+}
+
+/* Forzar disposición específica para zarpes-actions */
+.zarpes-actions {
+    width: auto !important;
+    max-width: calc(100% - 60px); /* Dejar espacio para el botón cerrar */
+    overflow: visible;
+}
+
+/* En pantallas muy pequeñas, mover botones a una nueva línea */
+@media (max-width: 480px) {
+    .zarpes-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .zarpes-actions {
+        justify-content: center;
+        max-width: 100%;
+        margin-top: 8px;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        margin-left: 0;
+    }
 }

@@ -29,6 +29,19 @@ class DataManager {
             ]
         };
         
+        //Sistema de caché
+        this.dataCache = {
+            zarpes: { data: null, lastLoaded: null },
+            ventas: { data: null, lastLoaded: null },
+            reservas: { data: null, lastLoaded: null }
+        };
+
+        this.activeZarpesFilters = {
+            search: '',
+            category: '',
+            date: ''
+        };
+
         this.init();
     }
 
@@ -43,16 +56,18 @@ class DataManager {
         console.log('🔄 Iniciando carga de datos inicial...');
         
         try {
-            // Mostrar indicador de carga general
             showLoading('Cargando datos del sistema...');
             
-            // Cargar datos principales en paralelo
+            // Cargar datos principales y actualizar caché
             const results = await Promise.allSettled([
-                this.loadZarpesDataSafe(),
-                this.updateDashboardStats()
+                this.loadAndCacheZarpes(),
+                this.loadAndCacheVentas(), 
+                this.loadAndCacheReservas()
             ]);
             
-            // Verificar resultados
+            // Actualizar estadísticas del dashboard
+            await this.updateDashboardStats();
+            
             const failedLoads = results.filter(result => result.status === 'rejected');
             
             if (failedLoads.length > 0) {
@@ -60,7 +75,7 @@ class DataManager {
                 showError('Algunos datos no se pudieron cargar completamente');
             } else {
                 showSuccess('Datos del sistema cargados exitosamente');
-                console.log('✅ Carga inicial completada');
+                console.log('✅ Carga inicial completada con caché actualizado');
             }
             
         } catch (error) {
@@ -71,32 +86,25 @@ class DataManager {
         }
     }
 
-    async loadZarpesDataSafe() {
-        try {
-            console.log('📊 Cargando datos de zarpes...');
-            const data = await loadZarpesData();
-            
-            if (data && data.length > 0) {
-                console.log(`✅ Cargados ${data.length} registros de zarpes`);
-                updateCollectionCount('countControlZarpes', data.length, true);
-                return data;
-            } else {
-                console.log('ℹ️ No se encontraron registros de zarpes');
-                updateCollectionCount('countControlZarpes', 0);
-                return [];
-            }
-        } catch (error) {
-            console.error('❌ Error cargando zarpes:', error);
-            updateCollectionCount('countControlZarpes', 'Error');
-            throw error;
-        }
-    }
+
+
 
     async updateDashboardStats() {
         try {
             console.log('📈 Actualizando estadísticas del dashboard...');
             
-            const stats = calculateStatistics(appState.zarpesData);
+            // Usar datos del caché si están disponibles
+            let statsData = appState.zarpesData;
+            if (!statsData || statsData.length === 0) {
+                // Si no hay datos en appState, intentar del caché
+                if (this.isCacheValid('zarpes')) {
+                    statsData = this.dataCache.zarpes.data;
+                    appState.zarpesData = statsData;
+                    appState.filteredZarpesData = [...statsData];
+                }
+            }
+            
+            const stats = calculateStatistics(statsData);
             
             // Actualizar contadores en las tarjetas
             updateCollectionCount('countControlZarpes', stats.totalRegistros, true);
@@ -112,7 +120,81 @@ class DataManager {
             console.error('❌ Error actualizando estadísticas:', error);
             throw error;
         }
+}
+
+
+
+
+    // ===========================
+    // CARGA OPTIMIZADA CON CACHÉ
+    // ===========================
+    async loadAndCacheZarpes() {
+        try {
+            console.log('📊 Cargando y cacheando zarpes...');
+            const data = await loadZarpesData();
+            
+            if (data && data.length > 0) {
+                this.updateCache('zarpes', data);
+                appState.zarpesData = data;
+                appState.filteredZarpesData = [...data];
+                updateCollectionCount('countControlZarpes', data.length, true);
+                console.log(`✅ Zarpes cargados y cacheados: ${data.length} registros`);
+            } else {
+                updateCollectionCount('countControlZarpes', 0);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Error cargando zarpes:', error);
+            updateCollectionCount('countControlZarpes', 'Error');
+            throw error;
+        }
     }
+
+    async loadAndCacheVentas() {
+        try {
+            console.log('💰 Cargando y cacheando ventas...');
+            
+            if (!window.firebaseService) {
+                throw new Error('FirebaseService no disponible');
+            }
+            
+            const data = await window.firebaseService.loadVentasData();
+            
+            if (data && data.length > 0) {
+                this.updateCache('ventas', data);
+                console.log(`✅ Ventas cargadas y cacheadas: ${data.length} registros`);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Error cargando ventas:', error);
+            return [];
+        }
+    }
+
+    async loadAndCacheReservas() {
+        try {
+            console.log('📋 Cargando y cacheando reservas...');
+            
+            if (!window.firebaseService) {
+                throw new Error('FirebaseService no disponible');
+            }
+            
+            const data = await window.firebaseService.loadReservasData();
+            
+            if (data && data.length > 0) {
+                this.updateCache('reservas', data);
+                console.log(`✅ Reservas cargadas y cacheadas: ${data.length} registros`);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Error cargando reservas:', error);
+            return [];
+        }
+    }
+
 
     // ===========================
     // CARGA DE DATOS DE ZARPES PARA MODAL
@@ -124,11 +206,28 @@ class DataManager {
         const noDataContainer = 'noZarpesData';
         
         try {
-            // Mostrar estado de carga
-            this.showZarpesLoadingState();
-            showInfo('Cargando registros de embarcaciones...');
+            // Verificar caché primero
+            if (this.isCacheValid('zarpes')) {
+                console.log('📦 Usando datos en caché para zarpes');
+                const cachedData = this.dataCache.zarpes.data;
+                
+                if (!cachedData || cachedData.length === 0) {
+                    this.showZarpesNoDataState();
+                    return;
+                }
+                
+                appState.zarpesData = cachedData;
+                appState.filteredZarpesData = [...cachedData];
+                this.displayZarpesData(cachedData);
+                this.enableExportButtons();
+                return;
+            }
             
-            // Cargar datos
+            // Cargar desde Firebase solo si no hay caché válido
+            console.log('🔄 Cargando zarpes desde Firebase...');
+            this.showZarpesLoadingState();
+            showInfo('Cargando registros desde la base de datos...');
+            
             const data = await loadZarpesData();
             
             if (!data || data.length === 0) {
@@ -137,11 +236,11 @@ class DataManager {
                 return;
             }
             
-            // Mostrar datos en tabla
+            // Guardar en caché
+            this.updateCache('zarpes', data);
+            
             this.displayZarpesData(data);
             showSuccess(`Cargados ${data.length} registros exitosamente`);
-            
-            // Habilitar botones de exportación
             this.enableExportButtons();
             
         } catch (error) {
@@ -149,7 +248,8 @@ class DataManager {
             this.showZarpesErrorState(error.message);
             this.handleZarpesLoadError(error);
         }
-    }
+}
+
 
     showZarpesLoadingState() {
         document.getElementById('zarpesLoading').style.display = 'flex';
@@ -204,6 +304,11 @@ class DataManager {
         document.getElementById('noZarpesData').style.display = 'none';
         document.getElementById('zarpesTableContainer').style.display = 'block';
         
+        const lastUpdateElement = document.getElementById('zarpesLastUpdate');
+        if (lastUpdateElement) {
+            lastUpdateElement.textContent = this.getLastUpdateText('zarpes');
+        }
+        this.populateCategoryFilter();  
         this.populateZarpesTable(data || appState.filteredZarpesData);
     }
 
@@ -422,6 +527,226 @@ class DataManager {
     }
 
     // ===========================
+    // FILTROS PARA ZARPES
+    // ===========================
+    setupZarpesFilters() {
+        console.log('🔍 Configurando filtros para zarpes...');
+        
+        const searchFilter = document.getElementById('searchFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const clearBtn = document.getElementById('clearZarpesFilters');
+        
+        if (searchFilter) {
+            searchFilter.addEventListener('input', (e) => {
+                this.activeZarpesFilters.search = e.target.value;
+                this.applyZarpesFilters();
+            });
+        }
+        
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', (e) => {
+                this.activeZarpesFilters.category = e.target.value;
+                console.log('🏷️ Filtro categoría seleccionado:', e.target.value);
+                this.applyZarpesFilters();
+            });
+        }
+        
+        if (dateFilter) {
+            dateFilter.addEventListener('change', (e) => {
+                this.activeZarpesFilters.date = e.target.value;
+                this.applyZarpesFilters();
+            });
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearZarpesFilters();
+            });
+        }
+        
+        console.log('✅ Filtros de zarpes configurados');
+    }
+
+    applyZarpesFilters() {
+        console.log('🔍 Aplicando filtros zarpes:', this.activeZarpesFilters);
+        
+        if (!appState.zarpesData || appState.zarpesData.length === 0) {
+            console.warn('No hay datos de zarpes para filtrar');
+            return;
+        }
+        
+        appState.filteredZarpesData = appState.zarpesData.filter(zarpe => {
+            // Filtro de búsqueda
+            if (this.activeZarpesFilters.search) {
+                const searchTerm = this.activeZarpesFilters.search.toLowerCase();
+                const matchesSearch = 
+                    (zarpe.embarcacion && zarpe.embarcacion.toLowerCase().includes(searchTerm)) ||
+                    (zarpe.administrador && zarpe.administrador.toLowerCase().includes(searchTerm)) ||
+                    (zarpe.categoria && zarpe.categoria.toLowerCase().includes(searchTerm)) ||
+                    (zarpe.embarcacionId && zarpe.embarcacionId.toString().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Filtro de categoría
+            if (this.activeZarpesFilters.category) {
+                if (!zarpe.categoria) return false;
+                
+                const zarpeCategoria = zarpe.categoria.toLowerCase().trim();
+                const filterCategoria = this.activeZarpesFilters.category.toLowerCase().trim();
+                
+                if (zarpeCategoria !== filterCategoria) {
+                    return false;
+                }
+}
+            
+            // Filtro de fecha
+            if (this.activeZarpesFilters.date) {
+                if (!zarpe.fechaHora) return false;
+                
+                try {
+                    let zarpeDate = '';
+                    if (zarpe.fechaHora.toDate) {
+                        zarpeDate = zarpe.fechaHora.toDate().toISOString().slice(0, 10);
+                    } else if (zarpe.fechaHora instanceof Date) {
+                        zarpeDate = zarpe.fechaHora.toISOString().slice(0, 10);
+                    } else if (typeof zarpe.fechaHora === 'string') {
+                        zarpeDate = new Date(zarpe.fechaHora).toISOString().slice(0, 10);
+                    }
+                    
+                    if (zarpeDate !== this.activeZarpesFilters.date) return false;
+                } catch (error) {
+                    console.warn('Error procesando fecha:', zarpe.fechaHora, error);
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        this.populateZarpesTable(appState.filteredZarpesData);
+        
+        console.log(`📊 Filtros zarpes aplicados: ${appState.filteredZarpesData.length}/${appState.zarpesData.length} registros`);
+    }
+
+    clearZarpesFilters() {
+        console.log('🧹 Limpiando filtros de zarpes...');
+        
+        this.activeZarpesFilters = {
+            search: '',
+            category: '',
+            date: ''
+        };
+        
+        // Limpiar campos UI
+        const searchFilter = document.getElementById('searchFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        
+        if (searchFilter) searchFilter.value = '';
+        if (categoryFilter) categoryFilter.selectedIndex = 0;
+        if (dateFilter) dateFilter.value = '';
+        
+        // Restaurar datos completos
+        if (appState.zarpesData) {
+            appState.filteredZarpesData = [...appState.zarpesData];
+            this.populateZarpesTable(appState.filteredZarpesData);
+        }
+        
+        if (window.showSuccess) {
+            window.showSuccess('Filtros de zarpes limpiados');
+        }
+    }
+
+    // ===========================
+    // GESTIÓN DINÁMICA DE CATEGORÍAS
+    // ===========================
+    populateCategoryFilter() {
+        const categorySelect = document.getElementById('categoryFilter');
+        if (!categorySelect) return;
+        
+        console.log('🏷️ Poblando selector de categorías...');
+        
+        // Limpiar opciones existentes (excepto la primera)
+        while (categorySelect.options.length > 1) {
+            categorySelect.removeChild(categorySelect.lastChild);
+        }
+        
+        if (!appState.zarpesData || appState.zarpesData.length === 0) {
+            console.log('⚠️ No hay datos para extraer categorías');
+            return;
+        }
+        
+        // Extraer categorías únicas de los datos
+        const categories = new Set();
+        appState.zarpesData.forEach(zarpe => {
+            if (zarpe.categoria && zarpe.categoria.trim()) {
+                categories.add(zarpe.categoria.trim());
+            }
+        });
+        
+        // Convertir a array y ordenar
+        const sortedCategories = Array.from(categories).sort();
+        
+        console.log('📋 Categorías encontradas:', sortedCategories);
+        
+        // Agregar cada categoría como opción
+        sortedCategories.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.toLowerCase();
+            option.textContent = categoria;
+            categorySelect.appendChild(option);
+        });
+        
+        console.log(`✅ Selector poblado con ${sortedCategories.length} categorías`);
+    }
+
+
+
+    // Métodos públicos para filtros de zarpes
+    getActiveZarpesFilters() {
+        return this.activeZarpesFilters;
+    }
+
+    hasActiveZarpesFilters() {
+        return this.activeZarpesFilters.search !== '' || 
+            this.activeZarpesFilters.category !== '' || 
+            this.activeZarpesFilters.date !== '';
+    }
+
+
+    debugCategorias() {
+        if (!appState.zarpesData) {
+            console.log('❌ No hay datos de zarpes');
+            return;
+        }
+        
+        console.log('🔍 Debug de categorías:');
+        console.log('Total registros:', appState.zarpesData.length);
+        
+        const categorias = {};
+        appState.zarpesData.forEach((zarpe, index) => {
+            const cat = zarpe.categoria || 'sin-categoria';
+            if (!categorias[cat]) {
+                categorias[cat] = 0;
+            }
+            categorias[cat]++;
+            
+            if (index < 5) { // Mostrar primeros 5 registros
+                console.log(`Registro ${index + 1}:`, {
+                    embarcacion: zarpe.embarcacion,
+                    categoria: zarpe.categoria,
+                    administrador: zarpe.administrador
+                });
+            }
+        });
+        
+        console.table(categorias);
+    }
+
+
+    // ===========================
     // EVENT LISTENERS DE TARJETAS
     // ===========================
     setupCardEventListeners() {
@@ -482,7 +807,14 @@ class DataManager {
             });
         }
 
-
+        // Botón de refresh para zarpes
+        const refreshZarpesBtn = document.getElementById('refreshZarpesBtn');
+        if (refreshZarpesBtn) {
+            refreshZarpesBtn.addEventListener('click', () => {
+                this.refreshCache('zarpes');
+                this.clearZarpesFilters();
+            });
+        }
 
 
     // Tarjeta de Reservas
@@ -555,6 +887,7 @@ class DataManager {
         // Cargar datos después de mostrar el modal
         setTimeout(() => {
             this.loadZarpesForModal();
+            this.setupZarpesFilters();
         }, 500);
     }
 
@@ -592,6 +925,86 @@ class DataManager {
         return appState.filteredCategoriasData;
     }
 
+    // ===========================
+    // SISTEMA DE CACHÉ
+    // ===========================
+    isCacheValid(cacheKey) {
+        const cache = this.dataCache[cacheKey];
+        const hasData = !!(cache && cache.data && cache.data.length > 0);
+        
+        console.log(`🔍 Caché ${cacheKey}: ${hasData ? 'disponible' : 'vacío'}`);
+        return hasData;
+    }
+
+    updateCache(cacheKey, data) {
+        this.dataCache[cacheKey] = {
+            data: [...data], // Copia para evitar mutaciones
+            lastLoaded: Date.now()
+        };
+        console.log(`💾 Caché actualizado para ${cacheKey}: ${data.length} registros`);
+    }
+
+    invalidateCache(cacheKey = null) {
+        if (cacheKey) {
+            this.dataCache[cacheKey] = { data: null, lastLoaded: null };
+            console.log(`🗑️ Caché invalidado para ${cacheKey}`);
+        } else {
+            // Invalidar todo el caché
+            Object.keys(this.dataCache).forEach(key => {
+                this.dataCache[key] = { data: null, lastLoaded: null };
+            });
+            console.log('🗑️ Todo el caché invalidado');
+        }
+    }
+
+    refreshCache(cacheKey) {
+        console.log(`🔄 Forzando recarga de caché para ${cacheKey}`);
+        this.invalidateCache(cacheKey);
+        
+        // Recargar según el tipo
+        switch(cacheKey) {
+            case 'zarpes':
+                this.loadZarpesForModal();
+                break;
+            case 'ventas':
+                if (window.salesManager) {
+                    window.salesManager.loadVentasData();
+                }
+                break;
+            case 'reservas':
+                if (window.reservasManager) {
+                    window.reservasManager.loadReservasData();
+                }
+                break;
+        }
+    }
+
+    getCacheStatus() {
+        const status = {};
+        Object.keys(this.dataCache).forEach(key => {
+            const cache = this.dataCache[key];
+            status[key] = {
+                hasData: !!cache.data,
+                recordCount: cache.data ? cache.data.length : 0,
+                lastLoaded: cache.lastLoaded ? new Date(cache.lastLoaded).toLocaleString() : 'Nunca',
+                isValid: this.isCacheValid(key)
+            };
+        });
+        return status;
+    }
+
+    getLastUpdateText(cacheKey) {
+        const cache = this.dataCache[cacheKey];
+        if (!cache || !cache.lastLoaded) {
+            return 'Nunca actualizado';
+        }
+        
+        const date = new Date(cache.lastLoaded);
+        return `Última actualización: ${date.toLocaleDateString('es-CO')} ${date.toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
+    }
 
 
     

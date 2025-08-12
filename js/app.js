@@ -889,4 +889,18 @@ window.retryLoadData = () => {
     }
 };
 
-console.log('🔗 Funciones globales de compatibilidad registradas');
+
+// Función global para debugging
+window.checkModalStatus = () => {
+    if (window.uiManager) {
+        console.table(window.uiManager.getModalStatus());
+    }
+};
+
+// AGREGAR esta función para forzar limpieza
+window.forceUnlockScroll = () => {
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.documentElement.style.overflow = '';
+    document.body.classList.remove('modal-open');
+};

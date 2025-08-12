@@ -617,3 +617,40 @@ body {
 .hidden {
     display: none !important;
 }
+
+
+
+/* ===========================================================================================================================
+/* ===========================================================================================================================
+/* ===========================================================================================================================
+   BLOQUEO DE SCROLL EN MODALES
+=========================== */
+body.modal-open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Prevenir scroll en iOS Safari */
+body.modal-open,
+html.modal-open {
+    touch-action: none;
+    -webkit-overflow-scrolling: none;
+    overflow: hidden !important;
+}
+
+/* Asegurar que los modales sigan siendo scrolleables */
+.modal-open .zarpes-overlay,
+.modal-open .login-overlay {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Contenido del modal scrolleable */
+.modal-open .zarpes-modal,
+.modal-open .login-modal {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}

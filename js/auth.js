@@ -305,7 +305,20 @@ class AuthService {
         
         // Resetear formulario
         this.resetLoginForm();
+
+        // Forzar restauración del scroll
+        setTimeout(() => {
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.documentElement.style.overflow = '';
+            document.body.classList.remove('modal-open');
+        }, 100);
+
+        // Cargar datos inicial después del login
+        this.loadInitialData();
     }
+
+
 
     onLogoutSuccess() {
         // Mostrar landing page
@@ -319,6 +332,19 @@ class AuthService {
         
         // Mostrar notificación
         showSuccess('Sesión cerrada exitosamente');
+
+
+        if (window.dataManager) {
+            window.dataManager.invalidateCache();
+            console.log('🧹 Auth: Caché limpiado al cerrar sesión');
+        }
+
+        // Asegurar scroll restaurado
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
+
     }
 
     updateUserInfo(user) {
@@ -378,6 +404,10 @@ class AuthService {
         if (window.carouselManager) {
             window.carouselManager.startCarousel();
         }
+
+        if (window.uiManager) {
+        window.uiManager.hideModal(CONSTANTS.MODALS.LOGIN);
+    }
     }
 
     showLoginModal() {
@@ -418,15 +448,23 @@ class AuthService {
     // ===========================
     async loadInitialData() {
         if (appState.isFirebaseInitialized && appState.currentUser) {
-            // Importar dinámicamente el data manager
             try {
-                const { dataManager } = await import('./data-manager.js');
-                setTimeout(() => {
-                    dataManager.loadInitialData();
-                }, 1000);
+                console.log('🔄 Auth: Iniciando carga de datos después del login...');
+                
+                // Usar directamente el dataManager global
+                if (window.dataManager) {
+                    await window.dataManager.loadInitialData();
+                    console.log('✅ Auth: Datos iniciales cargados exitosamente');
+                } else {
+                    console.error('❌ Auth: DataManager no disponible');
+                    showError('Error: Módulo de datos no disponible');
+                }
             } catch (error) {
-                console.error('Error cargando data manager:', error);
+                console.error('❌ Auth: Error cargando datos iniciales:', error);
+                showError('Error cargando datos del sistema');
             }
+        } else {
+            console.log('⚠️ Auth: No se pueden cargar datos - Firebase no inicializado o usuario no autenticado');
         }
     }
 

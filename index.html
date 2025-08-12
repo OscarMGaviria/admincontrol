@@ -44,7 +44,7 @@
             </div>
             <div class="header-right">
                 <button class="login-access-btn" id="loginAccessBtn">
-                    <i class="fas fa-key"></i> Acceso Administrador
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign in
                 </button>
             </div>
         </header>
@@ -65,7 +65,7 @@
                     </p>
                     <div class="hero-cta">
                         <button class="cta-btn" id="ctaBtn">
-                            <i class="fas fa-compass"></i> Administrar Sistema
+                            <i class="fas fa-compass"></i> Reserva ahora
                         </button>
                     </div>
                 </div>
@@ -162,6 +162,217 @@
         </div>
     </div>
 
+
+    <!-- MODAL DE RESERVAS -->
+    <div id="reservasOverlay" class="zarpes-overlay">
+        <div class="zarpes-modal">
+            <div class="zarpes-header">
+                <h2 class="zarpes-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Gestión de Reservas
+                </h2>
+                <div class="zarpes-actions">
+                    <button class="export-btn excel" id="excelReservasBtn">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="export-btn pdf" id="pdfReservasBtn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="export-btn refresh" id="refreshReservasBtn" title="Recargar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="modal-close" onclick="window.reservasManager.closeReservasModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="zarpes-content">
+                <!-- FILTROS PARA RESERVAS -->
+                <div class="filter-container">
+                    <input type="text" class="filter-input" id="searchReservasFilter" placeholder="Buscar por nombre, documento o empresa...">
+                    <select class="filter-select" id="estadoReservasFilter">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="usado">Usadas</option>
+                    </select>
+                    <select class="filter-select" id="categoriaReservasFilter">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                    <input type="date" class="filter-input" id="dateReservasFilter">
+                    <button class="filter-clear-btn" id="clearReservasFilters">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                </div>
+
+                <div id="reservasLoading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando datos de reservas...</p>
+                </div>
+
+                <div id="reservasError" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Error al cargar los datos de reservas.</span>
+                </div>
+
+                <div id="reservasTableContainer" class="table-container" style="display: none;">
+                    <table class="zarpes-table" id="reservasTable">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Empresa</th>
+                                <th>Categoría</th>
+                                <th>Pasajeros</th>
+                                <th>Fecha Reserva</th>
+                                <th>Fecha Salida</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noReservasData" class="no-data" style="display: none;">
+                    <div class="no-data-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h3>No hay reservas disponibles</h3>
+                    <p>No se encontraron registros de reservas con los filtros aplicados</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <span class="last-update-text" id="reservasLastUpdate">Cargando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL DE RESERVA PÚBLICA -->
+    <div id="reservaPublicaOverlay" class="zarpes-overlay">
+        <div class="zarpes-modal reserva-modal">
+            <!-- ENCABEZADO FIJO -->
+            <div class="zarpes-header">
+                <h2 class="zarpes-title">
+                    <i class="fas fa-ship"></i>
+                    Hacer una Reserva
+                </h2>
+                <div class="zarpes-actions">
+                    <button class="modal-close" id="reservaPublicaModalClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- CONTENIDO CON SCROLL -->
+            <div class="zarpes-content reserva-content">
+                <div class="reserva-subtitle">
+                    <p><strong>Con el fin de controlar el aumento de las reservas falsas se ha creado este formato en el cual se deben seguir las siguientes recomendaciones:</strong></p>
+                    <ul style="text-align: left; margin-top: 12px;">
+                        <li><strong>1.</strong> Cada reserva debe ser reportada sin objeción con 4 horas o más de antelación al Zarpe de la embarcación</li>
+                        <li><strong>2.</strong> Toda reserva debe ser diligenciada por este medio</li>
+                        <li><strong>3.</strong> Para poder continuar se debe llenar toda la información ya que los campos son obligatorios</li>
+                        <li><strong>4.</strong> Para dudas y preguntas está habilitada la línea celular <strong>324 512 1455</strong></li>
+                    </ul>
+                </div>
+                
+                <form class="reserva-form" id="reservaPublicaForm">
+                    <!-- INFORMACIÓN PERSONAL -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Información Personal
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-input" id="nombreReserva" placeholder="Nombre y apellidos" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Documento de Identidad *</label>
+                                <input type="number" class="form-input" id="documentoReserva" placeholder="123456789" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Email de Contacto *</label>
+                                <input type="email" class="form-input" id="emailReserva" placeholder="correo@ejemplo.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Empresa/Organización *</label>
+                                <input type="text" class="form-input" id="empresaReserva" placeholder="Nombre de la empresa" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono de Contacto *</label>
+                            <input type="tel" class="form-input" id="telefonoReserva" placeholder="3001234567" required>
+                        </div>
+                    </div>
+
+                    <!-- DETALLES DE LA RESERVA -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Detalles de la Reserva
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Embarcación *</label>
+                                <select class="form-input" id="categoriaReserva" required>
+                                    <option value="">Selecciona el tipo</option>
+                                    <option value="Lancha Taxi">Lancha Taxi</option>
+                                    <option value="Deportiva">Deportiva</option>
+                                    <option value="Planchón">Planchón</option>
+                                    <option value="Carguero">Carguero</option>
+                                    <option value="Barco">Barco</option>
+                                    <option value="Yate">Yate</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Número de Pasajeros *</label>
+                                <input type="number" class="form-input" id="pasajerosReserva" min="1" max="50" placeholder="Ej: 10" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Fecha y Hora de Reserva</label>
+                                    <input type="text" class="form-input" id="fechaReserva" readonly value="" placeholder="Se asigna automáticamente">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Fecha y Hora de Salida *</label>
+                                    <input type="datetime-local" class="form-input" id="fechaSalidaReserva" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- BOTÓN DE ENVÍO -->
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn" id="reservaSubmitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Reserva
+                        </button>
+                        <p class="form-note">
+                            <i class="fas fa-info-circle"></i>
+                            Te contactaremos en las próximas 24 horas para confirmar tu reserva
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
     <!-- MODAL DE REGISTROS -->
     <div id="zarpesOverlay" class="zarpes-overlay">
         <div class="zarpes-modal">
@@ -177,6 +388,9 @@
                     <button class="export-btn pdf" id="pdfBtn">
                         <i class="fas fa-file-pdf"></i> PDF
                     </button>
+                    <button class="export-btn refresh" id="refreshZarpesBtn" title="Recargar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                     <button class="modal-close" id="zarpesModalClose">
                         <i class="fas fa-times"></i>
                     </button>
@@ -188,11 +402,12 @@
                     <input type="text" class="filter-input" id="searchFilter" placeholder="Buscar por embarcación, administrador o categoría...">
                     <select class="filter-select" id="categoryFilter">
                         <option value="">Todas las categorías</option>
-                        <option value="carguero">Carguero</option>
-                        <option value="pasajeros">Pasajeros</option>
-                        <option value="turismo">Turismo</option>
+                        <!-- Las opciones se cargarán dinámicamente -->
                     </select>
                     <input type="date" class="filter-input" id="dateFilter">
+                        <button class="filter-clear-btn" id="clearZarpesFilters">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
                 </div>
 
                 <div id="zarpesLoading" class="loading-container">
@@ -231,6 +446,9 @@
                     <h3>No hay datos disponibles</h3>
                     <p>No se encontraron registros en la base de datos</p>
                 </div>
+                <div class="modal-footer">
+                    <span class="last-update-text" id="zarpesLastUpdate">Cargando...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -249,6 +467,10 @@
                     </button>
                     <button class="export-btn pdf" id="pdfCategoriasBtn">
                         <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+
+                    <button class="export-btn refresh" id="refreshReservasBtn" title="Recargar datos">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                     <button class="modal-close" id="categoriasModalClose">
                         <i class="fas fa-times"></i>
@@ -317,6 +539,10 @@
                     <button class="export-btn pdf" id="pdfVentasBtn">
                         <i class="fas fa-file-pdf"></i> PDF
                     </button>
+
+                    <button class="export-btn refresh" id="refreshReservasBtn" title="Recargar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                     <button class="modal-close" onclick="window.salesManager.closeVentasModal()">
                         <i class="fas fa-times"></i>
                     </button>
@@ -324,45 +550,14 @@
             </div>
             
             <div class="zarpes-content">
-                <!-- Estadísticas de ventas -->
-                <div class="sales-stats-container">
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalVentasCount">0</div>
-                            <div class="stat-label">Total Ventas</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalPasajerosVentas">0</div>
-                            <div class="stat-label">Total Pasajeros</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalIngresosVentas">$0</div>
-                            <div class="stat-label">Ingresos Totales</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="promedioVentasPrecio">$0</div>
-                            <div class="stat-label">Precio Promedio</div>
-                        </div>
-                    </div>
+                <div class="filter-container">
+                    <input type="text" class="filter-input" id="searchVentasFilter" placeholder="Buscar por nombre, documento o embarcación...">
+                    <input type="date" class="filter-input" id="dateVentasFilter">
+                    <button class="filter-clear-btn" id="clearVentasFilters">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
                 </div>
+
 
                 <div id="ventasLoading" class="loading-container">
                     <div class="loading-spinner"></div>
@@ -403,131 +598,16 @@
                     <h3>No hay datos de ventas</h3>
                     <p>No se encontraron registros de ventas en la base de datos</p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- MODAL DE RESERVAS -->
-    <div id="reservasOverlay" class="zarpes-overlay">
-        <div class="zarpes-modal">
-            <div class="zarpes-header">
-                <h2 class="zarpes-title">
-                    <i class="fas fa-calendar-check"></i>
-                    Gestión de Reservas
-                </h2>
-                <div class="zarpes-actions">
-                    <button class="export-btn excel" id="excelReservasBtn">
-                        <i class="fas fa-file-excel"></i> Excel
-                    </button>
-                    <button class="export-btn pdf" id="pdfReservasBtn">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-                    <button class="modal-close" onclick="window.reservasManager.closeReservasModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="zarpes-content">
-                <!-- Estadísticas de reservas -->
-                <div class="sales-stats-container">
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalReservasCount">0</div>
-                            <div class="stat-label">Total Reservas</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalPasajerosReservas">0</div>
-                            <div class="stat-label">Total Pasajeros</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="reservasPendientes">0</div>
-                            <div class="stat-label">Pendientes</div>
-                        </div>
-                    </div>
-                    <div class="sales-stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="reservasUsadas">0</div>
-                            <div class="stat-label">Usadas</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección de carga masiva -->
-                <div id="reservasUploadSection" class="upload-section" style="display: none;">
-                    <h3><i class="fas fa-upload"></i> Carga Masiva de Reservas</h3>
-                    <div class="upload-container">
-                        <div class="upload-area">
-                            <input type="file" id="excelFileInput" accept=".xlsx,.xls" class="file-input">
-                            <label for="excelFileInput" class="file-label">
-                                <i class="fas fa-file-excel"></i>
-                                <span>Seleccionar archivo Excel</span>
-                            </label>
-                            <button id="uploadExcelBtn" class="upload-btn" disabled>
-                                <i class="fas fa-cloud-upload-alt"></i> Cargar Datos
-                            </button>
-                        </div>
-                        <div id="excelPreview" class="excel-preview" style="display: none;"></div>
-                    </div>
-                </div>
-
-                <div id="reservasLoading" class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <p>Cargando datos de reservas...</p>
-                </div>
-
-                <div id="reservasError" class="error-message" style="display: none;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Error al cargar los datos de reservas.</span>
-                </div>
-
-                <div id="reservasTableContainer" class="table-container" style="display: none;">
-                    <table class="zarpes-table" id="reservasTable">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Nombre</th>
-                                <th>Documento</th>
-                                <th>Empresa</th>
-                                <th>Categoría</th>
-                                <th>Pasajeros</th>
-                                <th>Fecha Reserva</th>
-                                <th>Fecha Salida</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reservasTableBody">
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="noReservasData" class="no-data" style="display: none;">
-                    <div class="no-data-icon">
-                        <i class="fas fa-calendar-times"></i>
-                    </div>
-                    <h3>No hay reservas disponibles</h3>
-                    <p>No se encontraron registros de reservas en la base de datos</p>
+                <div class="modal-footer">
+                    <span class="last-update-text" id="ventasLastUpdate">Cargando...</span>
                 </div>
             </div>
         </div>
     </div>
+
+
+
+
 
     <!-- DASHBOARD ADMINISTRATIVO (OCULTO INICIALMENTE) -->
     <div id="adminDashboard" class="admin-dashboard">
@@ -677,18 +757,25 @@
         </div>
     </div>
 
-    <!-- Scripts Modulares -->
-    <script src="js/sales-manager.js"></script>
-    <script src="js/reservas-manager.js"></script>
+    <!-- 1) Config + Firebase primero -->
     <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/notifications.js"></script>
     <script type="module" src="js/firebase-service.js"></script>
+
+    <!-- 2) Módulos que NO escriben aún, pero pueden necesitar appState -->
+    <script type="module" src="js/notifications.js"></script>
     <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/carousel.js"></script>
     <script type="module" src="js/ui-components.js"></script>
     <script type="module" src="js/data-manager.js"></script>
     <script type="module" src="js/export-service.js"></script>
     <script type="module" src="js/filters.js"></script>
+    <script type="module" src="js/carousel.js"></script>
     <script type="module" src="js/app.js"></script>
+
+    <!-- 3) Scripts clásicos que usan window.appState (después de firebase-service) -->
+    <script src="js/sales-manager.js"></script>
+    <script src="js/reservas-manager.js"></script>
+
+    <!-- 4) El formulario público al final (depende de Firebase listo) -->
+    <script src="js/reserva-publica.js"></script>
 </body>
 </html>

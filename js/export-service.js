@@ -320,7 +320,7 @@ class ExportService {
             if (!this.validateExcelExport()) return;
             
             const data = window.salesManager ? 
-                window.salesManager.getFilteredData() : 
+                window.salesManager.getFilteredData() :
                 appState.filteredVentasData || [];
                 
             if (!this.validateData(data, 'Excel')) return;

@@ -114,8 +114,17 @@ class UIManager {
         // Añadir clase al body para prevenir scroll
         document.body.classList.add('modal-open');
 
+        // Añadir clase al body para prevenir scroll
+        document.body.classList.add('modal-open');
+
+        // Bloquear scroll del body
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = this.getScrollbarWidth() + 'px';
+        document.documentElement.style.overflow = 'hidden';
+
         return true;
     }
+
 
     hideModal(modalId) {
         const modalData = this.modals.get(modalId);
@@ -138,11 +147,23 @@ class UIManager {
         });
         document.dispatchEvent(event);
 
-        // Remover clase del body
-        document.body.classList.remove('modal-open');
+        // MEJORAR ESTA SECCIÓN
+        // Verificar si quedan modales abiertos
+        const remainingOpenModals = Array.from(this.modals.values()).filter(modal => modal.isOpen);
+    
+        
+        // Solo restaurar scroll si NO hay modales abiertos
+        if (remainingOpenModals.length === 0) {
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.documentElement.style.overflow = '';
+            document.body.classList.remove('modal-open');
+        } 
 
         return true;
     }
+
+
 
     hideAllModals() {
         this.modals.forEach((modalData, modalId) => {
@@ -150,6 +171,33 @@ class UIManager {
                 this.hideModal(modalId);
             }
         });
+        // Asegurar que el scroll se restaure completamente
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
+    }
+
+
+    // ===========================
+    // UTILIDAD PARA SCROLLBAR
+    // ===========================
+    getScrollbarWidth() {
+        // Crear elemento temporal para medir scrollbar
+        const outer = document.createElement('div');
+        outer.style.visibility = 'hidden';
+        outer.style.overflow = 'scroll';
+        outer.style.msOverflowStyle = 'scrollbar';
+        document.body.appendChild(outer);
+        
+        const inner = document.createElement('div');
+        outer.appendChild(inner);
+        
+        const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+        
+        outer.parentNode.removeChild(outer);
+        
+        return scrollbarWidth;
     }
 
     isModalOpen(modalId) {
@@ -465,6 +513,11 @@ class UIManager {
     // CLEANUP
     // ===========================
     destroy() {
+        // Restaurar scroll antes de destruir
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
         // Cerrar todos los modales
         this.hideAllModals();
         
@@ -475,9 +528,29 @@ class UIManager {
         // Remover clase del body
         document.body.classList.remove('modal-open');
         
-        console.log('UIManager destruido');
     }
+
+    // ===========================
+    // DEBUGGING DE MODALES
+    // ===========================
+    getModalStatus() {
+        const status = {};
+        this.modals.forEach((modalData, modalId) => {
+            status[modalId] = {
+                isOpen: modalData.isOpen,
+                display: modalData.element.style.display
+            };
+        });
+        return {
+            activeModal: this.activeModal,
+            modals: status,
+            bodyHasModalClass: document.body.classList.contains('modal-open'),
+            bodyOverflow: document.body.style.overflow
+        };
+    }
+
 }
+
 
 // Crear instancia global
 const uiManager = new UIManager();

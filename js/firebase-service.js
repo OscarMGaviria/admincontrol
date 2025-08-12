@@ -9,6 +9,11 @@ import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 import { firebaseConfig, appConfig, appState, CONSTANTS } from './config.js';
 import { showConnectionStatus, showError, showSuccess } from './notifications.js';
 
+
+// Alinear el estado global de la app con el appState importado
+window.appState = appState;
+window.appState.isFirebaseInitialized = false;
+
 class FirebaseService {
     constructor() {
         this.maxRetries = appConfig.ui.retryAttempts;
@@ -39,6 +44,10 @@ class FirebaseService {
                 
                 // Iniciar monitoreo de conexión
                 this.startConnectionMonitoring();
+
+                // Avisar al resto de la app
+                window.appState = appState;
+                window.dispatchEvent(new Event('firebase-ready'));
                 
                 return true;
             } catch (error) {
@@ -57,7 +66,9 @@ class FirebaseService {
                 }
             }
         }
-        
+        // Avisar al resto de la app (¡esto es clave!)
+        window.appState = appState;
+        window.dispatchEvent(new Event('firebase-ready'));
         return false;
     }
 
@@ -378,32 +389,6 @@ class FirebaseService {
     }
 
 
-
-    // AGREGAR este método en la clase FirebaseService:
-    async loadVentasData() {
-        try {
-            this.validateFirebaseState();
-            
-            const ventasRef = collection(appState.db, 'ventas');
-            const q = query(ventasRef, orderBy('timestamp', 'desc'));
-            const querySnapshot = await getDocs(q);
-            
-            const ventasData = [];
-            querySnapshot.forEach((doc) => {
-                ventasData.push({ 
-                    id: doc.id, 
-                    ...doc.data() 
-                });
-            });
-
-            console.log('Ventas cargadas:', ventasData.length, 'registros');
-            return ventasData;
-            
-        } catch (error) {
-            console.error('Error cargando ventas:', error);
-            throw this.handleFirebaseError(error);
-        }
-    }
 
 
     async loadReservasData() {
