@@ -4,12 +4,12 @@
 
 // Configuración de Firebase
 export const firebaseConfig = {
-    apiKey: "AIzaSyDdjYoi4BSBFFAuXumLxj-NMQWUVSFdSv4",
-    authDomain: "contratos-5e932.firebaseapp.com",
-    projectId: "contratos-5e932",
-    storageBucket: "contratos-5e932.firebasestorage.app",
-    messagingSenderId: "945849105278",
-    appId: "1:945849105278:web:f0291a411b8e33327a112f"
+    apiKey: "AIzaSyBIYiRIRqaxjMKv1IzM--KM6mBNiOoS7DE",
+    authDomain: "muelle-guatape.firebaseapp.com",
+    projectId: "muelle-guatape",
+    storageBucket: "muelle-guatape.firebasestorage.app",
+    messagingSenderId: "527376761734",
+    appId: "1:527376761734:web:e229d7725ad323182a6207"
 };
 
 // Configuración de la aplicación
